@@ -23,6 +23,10 @@ public class Product {
     @Column(name =  "price", nullable = false)
     private Double price;
 
+    @ManyToOne
+    @JoinColumn(name = "producer_id")
+    private Producer producer;
+
 //    @Column(name = "added_at", nullable = false)
 //    private LocalDate addedAt;
 

@@ -1,8 +1,7 @@
-package ua.com.agroswit.dto.converter;
+package ua.com.agroswit.dto.response.converter;
 
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
-import ua.com.agroswit.dto.ProductDTO;
+import ua.com.agroswit.dto.response.ProductDTO;
 import ua.com.agroswit.model.Product;
 
 import java.util.function.Function;
@@ -15,6 +14,7 @@ public class ProductDTOConverter implements Function<Product, ProductDTO> {
                 .id(product.getId())
                 .price(product.getPrice())
                 .name(product.getName())
+                .producer(product.getProducer())
                 .build();
     }
 }
