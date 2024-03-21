@@ -6,6 +6,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ua.com.agroswit.dto.request.ProductCreationDTO;
+import ua.com.agroswit.dto.response.ProductDTO;
+import ua.com.agroswit.dto.response.converter.ProductDTOConverter;
 import ua.com.agroswit.model.Product;
 import ua.com.agroswit.repository.ProducerRepository;
 import ua.com.agroswit.repository.ProductRepository;
@@ -20,25 +22,41 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProducerRepository producerRepository;
     private final ProductRepository productRepository;
+    private final ProductDTOConverter converter;
 
     @Override
-    public Page<Product> getAll(Pageable pageable) {
-        return productRepository.findAll(pageable);
+    public Page<ProductDTO> getAll(Pageable pageable) {
+        var productPage = productRepository.findAll(pageable);
+
+        return productPage.map(p -> converter.convert(
+                p, productRepository.findAllPropertiesById(p.getId())
+        ));
     }
 
     @Override
-    public Page<Product> getAllByProducer(Integer producerId, Pageable pageable) {
-        return productRepository.findByProducerId(producerId, pageable);
+    public Page<ProductDTO> getAllByProducer(Integer producerId, Pageable pageable) {
+        var productPage = productRepository.findByProducerId(producerId, pageable);
+        return productPage.map(p -> converter.convert(
+                p, productRepository.findAllPropertiesById(p.getId())
+        ));
     }
 
     @Override
-    public Optional<Product> getById(Long id) {
-        return productRepository.findById(id);
+    public Optional<ProductDTO> getById(Long id) {
+        var product = productRepository.findById(id);
+
+        System.out.println(productRepository.findAllPropertiesById(id));
+        return product.map((p) -> converter.convert(
+                p, productRepository.findAllPropertiesById(id)));
     }
 
     @Override
-    public Optional<Product> getByName(String name) {
-        return productRepository.findByName(name);
+    public Optional<ProductDTO> getByName(String name) {
+        var product = productRepository.findByName(name);
+
+        return product.map((p) -> converter.convert(
+                p, productRepository.findAllPropertiesById(p.getId())
+        ));
     }
 
     @Override

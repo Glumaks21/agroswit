@@ -25,7 +25,6 @@ import java.util.Optional;
 public class ProductController {
 
     private final ProductService service;
-    private final ProductDTOConverter converter;
 
     @GetMapping
     ResponseEntity<List<ProductDTO>> getAll(@RequestParam(required = false, defaultValue = "1") int page,
@@ -34,8 +33,7 @@ public class ProductController {
         var pageable = PageRequest.of(page - 1, size);
 
         var productPage = producerId.map(id -> service.getAllByProducer(id, pageable))
-                .orElseGet(() -> service.getAll(pageable))
-                .map(converter);
+                .orElseGet(() -> service.getAll(pageable));
 
         var headers = new HttpHeaders() ;
         headers.add("X-Total-Count", String.valueOf(productPage.getTotalPages()));
@@ -45,15 +43,15 @@ public class ProductController {
 
     @GetMapping(path = "/{id}")
     ResponseEntity<ProductDTO> getById(@PathVariable Long id) {
-        var product = service.getById(id).map(converter);
+        var product = service.getById(id);
         return product.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    ProductDTO create(@RequestBody @Validated ProductCreationDTO dto) {
+    Product create(@RequestBody @Validated ProductCreationDTO dto) {
         log.info("Received product creation request with dto: {}", dto);
-        return converter.apply(service.create(dto));
+        return service.create(dto);
     }
 
     @DeleteMapping(path = "/{id}")

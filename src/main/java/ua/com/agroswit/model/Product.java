@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 
+import java.util.HashMap;
+
 import static jakarta.persistence.GenerationType.IDENTITY;
 
 @Entity
@@ -27,10 +29,8 @@ public class Product {
     @JoinColumn(name = "producer_id")
     private Producer producer;
 
-//    @Column(name = "added_at", nullable = false)
-//    private LocalDate addedAt;
-
-//    @Column(name = "added_at")
-//    private LocalDate modifiedAd;
+    @ManyToOne
+    @JoinColumn(name = "subcategory_id")
+    private SubCategory subCategory;
 
 }
