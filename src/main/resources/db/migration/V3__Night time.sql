@@ -34,34 +34,8 @@ create table product_property_value
     primary key (product_id, property_id)
 );
 
-INSERT INTO category(name)
-VALUES ('test1'),
-       ('test2'),
-       ('test3');
-
-INSERT INTO subcategory(name, category_id)
-VALUES ('test11', 1),
-       ('test12', 1),
-       ('test22', 2),
-       ('test31', 3),
-       ('test32', 3),
-       ('test33', 3);
-
-
-alter table if exists product
+alter table product
     add column subcategory_id integer not null default 1;
-
-UPDATE product
-SET subcategory_id = 1
-WHERE id = 1;
-
-UPDATE product
-SET subcategory_id = 2
-WHERE id = 2;
-
-UPDATE product
-SET subcategory_id = 3
-WHERE id = 3;
 
 alter table category
     add constraint category_name_uk unique (name);
@@ -88,21 +62,3 @@ alter table subcategory_properties
     add constraint subcat_props_prop_id_fk
         foreign key (property_id)
             references product_property;
-
-INSERT INTO product_property(name)
-VALUES ('height'),
-       ('width'),
-       ('color'),
-       ('margin');
-
-INSERT INTO subcategory_properties (subcategory_id, property_id)
-VALUES (1, 1),
-       (2, 2),
-       (2, 3),
-       (3, 4);
-
-INSERT INTO product_property_value(product_id, property_id, prop_value)
-VALUES (1, 1, '12px'),
-       (2, 2, '30px'),
-       (2, 3, 'red'),
-       (3, 4, '10px');

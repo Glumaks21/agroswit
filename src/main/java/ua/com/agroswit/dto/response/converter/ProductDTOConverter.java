@@ -29,6 +29,7 @@ public class ProductDTOConverter {
                 .description(properties.stream()
                         .collect(toMap(ProductPropertyView::getName, ProductPropertyView::getValue))
                 )
+                .article1CId(product.getArticle1CId())
                 .build();
     }
 

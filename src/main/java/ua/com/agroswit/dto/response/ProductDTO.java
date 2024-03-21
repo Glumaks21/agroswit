@@ -12,5 +12,6 @@ public record ProductDTO(Long id,
                          Double price,
                          Producer producer,
                          Map<String, String> description,
+                         Integer article1CId,
                          SubCategoryDTO subcategory) {
 }

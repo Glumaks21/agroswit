@@ -14,19 +14,6 @@ alter table producer
 alter table producer
     add constraint producer_name_uk unique (name);
 
-alter table if exists product
+alter table product
     add constraint product_producer_id_fk
         foreign key (producer_id) references producer;
-
-INSERT INTO producer(name, logo_url)
-VALUES ('Agronutrition', 'https://agroswit.com.ua/image/cache/catalog/Parthners/09-agronutrition-100x100.png'),
-       ('FMC Ukraine', 'https://agroswit.com.ua/image/cache/catalog/Parthners/04-fmc-100x100.png'),
-       ('Corteva Agriscience', 'https://agroswit.com.ua/image/cache/catalog/Parthners/03-corteva-100x100.png'),
-       ('MAS Seeds', 'https://agroswit.com.ua/image/cache/catalog/Parthners/23-maïsadour_semences-100x100.png'),
-       ('UPL', 'https://agroswit.com.ua/image/cache/catalog/Parthners/05-upl-100x100.png'),
-       ('May Seeds', 'https://agroswit.com.ua/image/cache/catalog/Parthners/06-may-100x100.png'),
-       ('Bayer', 'https://agroswit.com.ua/image/cache/catalog/Parthners/01-bayer-100x100.png');
-
-UPDATE product SET producer_id = 6 WHERE name = 'Рейна';
-UPDATE product SET producer_id = 6 WHERE name = 'ДуетКЛ';
-UPDATE product SET producer_id = 7 WHERE name = 'Еленіс';

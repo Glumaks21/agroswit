@@ -6,9 +6,3 @@ create table product
     name  varchar(300) not null unique,
     constraint product_pk primary key (id)
 );
-
-INSERT INTO product(name,
-                    price)
-VALUES ('Рейна', 5000),
-       ('ДуетКЛ', 6000),
-       ('Еленіс', 8000);

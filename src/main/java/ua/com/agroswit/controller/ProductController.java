@@ -18,6 +18,7 @@ import ua.com.agroswit.service.ProductService;
 import java.util.List;
 import java.util.Optional;
 
+@CrossOrigin
 @Slf4j
 @RestController
 @RequestMapping(value = "/api/v1/products")

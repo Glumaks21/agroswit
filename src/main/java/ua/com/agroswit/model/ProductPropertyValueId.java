@@ -8,7 +8,6 @@ import java.io.Serializable;
 public class ProductPropertyValueId implements Serializable {
 
     private Long productId;
-
     private Integer propertyId;
 
 }
