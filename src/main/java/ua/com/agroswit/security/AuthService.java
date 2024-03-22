@@ -6,8 +6,9 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import ua.com.agroswit.dto.request.LoginDTO;
-import ua.com.agroswit.dto.request.RegistrationDTO;
+import ua.com.agroswit.dto.request.SignInRequest;
+import ua.com.agroswit.dto.request.SignUpRequest;
+import ua.com.agroswit.exception.ResourceInConflictStateException;
 import ua.com.agroswit.model.RoleE;
 import ua.com.agroswit.model.User;
 import ua.com.agroswit.repository.UserRepository;
@@ -22,10 +23,10 @@ public class AuthService {
     private final JwtService jwtService;
     private final AuthenticationManager authManager;
 
-    public JwtResponseDTO register(RegistrationDTO dto) {
+    public JwtResponseDTO signUp(SignUpRequest dto) {
         if (userRepository.existsByLogin(dto.login())) {
-            //TODO Add own exception
-            throw new RuntimeException();
+            throw new ResourceInConflictStateException(
+                    "User with login " + dto.login() + " already exists");
         }
 
         var user = User.builder()
@@ -43,7 +44,7 @@ public class AuthService {
         return new JwtResponseDTO(accessToken, refreshToken);
     }
 
-    public JwtResponseDTO login(LoginDTO dto) {
+    public JwtResponseDTO signIn(SignInRequest dto) {
         authManager.authenticate(
                 new UsernamePasswordAuthenticationToken(dto.login(), dto.password()));
 

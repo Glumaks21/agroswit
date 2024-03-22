@@ -53,3 +53,6 @@ VALUES (1, 1, '48-52'),
        (1, 3, '50тис.'),
        (1, 6, 'степ, лісостеп'),
        (1, 8, 'до 8 рас');
+
+INSERT INTO users(login, password, role)
+VALUES ( 'glumaks21', '$2a$10$8uyWkYjmBFy.Rk9N6iQJDet0JF01EhxubbelUOGLF.KVs9BSnWj5C', 'ADMIN' );

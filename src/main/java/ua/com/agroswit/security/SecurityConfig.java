@@ -1,9 +1,11 @@
 package ua.com.agroswit.security;
 
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -24,12 +26,24 @@ import ua.com.agroswit.repository.UserRepository;
 
 import java.util.Set;
 
+import static org.springframework.http.HttpMethod.*;
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
+@SecurityScheme(
+        name = "bearerAuth",
+        description = "Authorization with JWT access token, " +
+                "wich can be accessible via Authorization header, " +
+                "that starts with \"Bearer: \"",
+        scheme = "bearer",
+        type = SecuritySchemeType.HTTP,
+        bearerFormat = "JWT",
+        in = SecuritySchemeIn.HEADER
+)
 @EnableWebSecurity
 @Configuration
 @RequiredArgsConstructor
-public class Config {
+public class SecurityConfig {
+
     private final UserRepository userRepository;
     private final JwtFilter jwtFilter;
 
@@ -37,7 +51,16 @@ public class Config {
     DefaultSecurityFilterChain configHttp(HttpSecurity http) throws Exception {
         return http
                 .authorizeHttpRequests(req -> req
-                        .anyRequest().permitAll()
+                        .requestMatchers(
+                                "/api/v1/auth/**",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**").permitAll()
+                        .requestMatchers(GET,
+                                "/api/v1/products",
+                                "/api/v1/categories",
+                                "/api/v1/subcategories",
+                                "/api/v1/producers").permitAll()
+                        .anyRequest().authenticated()
                 )
                 .headers(h -> h
                         .frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
@@ -68,7 +91,7 @@ public class Config {
     UserDetailsService userDetailsService() {
         return login -> userRepository.findByLogin(login)
                 .map(u -> new User(u.getLogin(), u.getPassword(), Set.of(
-                        new SimpleGrantedAuthority(u.getRole().toString())))
+                        new SimpleGrantedAuthority("ROLE_" + u.getRole().toString())))
                 )
                 .orElseThrow(() -> new UsernameNotFoundException(login));
     }

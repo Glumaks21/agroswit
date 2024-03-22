@@ -1,15 +1,18 @@
 package ua.com.agroswit.dto.request;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotBlank;
 import org.hibernate.validator.constraints.Length;
 
-public record RegistrationDTO(
+@Schema(description = "User sign in credentials")
+public record SignInRequest(
         @NotBlank
         @Length(min = 6, max = 30)
         String login,
 
         @NotBlank
-        @Length(min = 10, max = 30)
+        @Length(min = 6, max = 20)
         String password
 ) {
 }
