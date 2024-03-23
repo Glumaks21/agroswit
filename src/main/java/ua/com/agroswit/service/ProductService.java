@@ -11,9 +11,9 @@ import java.util.Optional;
 public interface ProductService {
     Page<ProductDTO> getAll(Pageable pageable);
     Page<ProductDTO> getAllByProducer(Integer producerId, Pageable pageable);
-    Optional<ProductDTO> getById(Long id);
+    Optional<ProductDTO> getById(Integer id);
     Optional<ProductDTO> getByName(String name);
     Product create(ProductCreationDTO dto);
     Product update();
-    void delete(Long id);
+    void delete(Integer id);
 }

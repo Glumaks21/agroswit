@@ -12,14 +12,14 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ProductRepository extends JpaRepository<Product, Long> {
+public interface ProductRepository extends JpaRepository<Product, Integer> {
     Optional<Product> findByName(String name);
 
     Page<Product> findByProducerId(Integer id, Pageable pageable);
 
     @Query(value = "SELECT pp.name AS name, ppv.value AS value FROM Product p " +
             "INNER JOIN ProductPropertyValue ppv ON p.id = ppv.productId " +
-            "INNER JOIN ProductProperty pp ON ppv.propertyId = pp.id " +
+            "INNER JOIN SubCategoryProperty pp ON ppv.propertyId = pp.id " +
             "WHERE p.id = ?1")
-    List<ProductPropertyView> findAllPropertiesById(Long id);
+    List<ProductPropertyView> findAllPropertiesById(Integer id);
 }

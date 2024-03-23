@@ -9,7 +9,7 @@ import lombok.Data;
 public class ProductPropertyValue {
 
     @Id
-    private Long productId;
+    private Integer productId;
 
     @Id
     private Integer propertyId;

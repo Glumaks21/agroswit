@@ -42,7 +42,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Optional<ProductDTO> getById(Long id) {
+    public Optional<ProductDTO> getById(Integer id) {
         var product = productRepository.findById(id);
 
         System.out.println(productRepository.findAllPropertiesById(id));
@@ -79,7 +79,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void delete(Long id) {
+    public void delete(Integer id) {
         log.info("Deleting product with id: ${}", id);
         productRepository.deleteById(id);
     }

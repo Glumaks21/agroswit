@@ -50,13 +50,13 @@ public class ProductController {
 
     @Operation(summary = "Retrieve product by id")
     @GetMapping(path = "/{id}", produces = APPLICATION_JSON_VALUE)
-    ResponseEntity<ProductDTO> getById(@PathVariable Long id) {
+    ResponseEntity<ProductDTO> getById(@PathVariable Integer id) {
         var product = service.getById(id);
         return product.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @Operation(summary = "Retrieve product by id")
+    @Operation(summary = "Create product")
     @PostMapping(consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     Product create(@RequestBody @Validated ProductCreationDTO dto) {
         log.info("Received product creation request with dto: {}", dto);
@@ -65,9 +65,8 @@ public class ProductController {
 
     @Operation(summary = "Remove product by id")
     @DeleteMapping(path = "/{id}", produces = APPLICATION_JSON_VALUE)
-    void delete(@PathVariable Long id) {
+    void delete(@PathVariable Integer id) {
         log.info("Received product deleting request for id: {}", id);
         service.delete(id);
     }
 }
-

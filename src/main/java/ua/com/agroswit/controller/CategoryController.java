@@ -10,12 +10,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import ua.com.agroswit.dto.request.CategoryCreationDTO;
 import ua.com.agroswit.dto.response.CategoryDTO;
 import ua.com.agroswit.dto.response.converter.CategoryDTOConverter;
+import ua.com.agroswit.model.Category;
 import ua.com.agroswit.service.CategoryService;
 
 import java.util.Collection;
@@ -38,5 +37,11 @@ public class CategoryController {
         return service.getAll().stream()
                 .map(converter)
                 .toList();
+    }
+
+    @Operation(summary = "Create new category")
+    @PostMapping(consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    Category create(@RequestBody CategoryCreationDTO dto) {
+        return service.create(dto);
     }
 }

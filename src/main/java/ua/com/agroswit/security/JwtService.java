@@ -26,6 +26,7 @@ public class JwtService {
         var expireDate = new Date(System.currentTimeMillis() + expiration);
 
         return Jwts.builder()
+                .signWith(getKey())
                 .subject(user.getLogin())
                 .issuedAt(issueDate)
                 .expiration(expireDate)

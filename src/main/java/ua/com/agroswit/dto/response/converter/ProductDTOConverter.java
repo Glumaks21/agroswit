@@ -25,9 +25,10 @@ public class ProductDTOConverter {
                 .price(product.getPrice())
                 .name(product.getName())
                 .producer(product.getProducer())
-                .subcategory(converter.apply(product.getSubCategory()))
+                .subcategoryId(product.getSubCategory().getId())
                 .description(properties.stream()
-                        .collect(toMap(ProductPropertyView::getName, ProductPropertyView::getValue))
+                        .map(p -> new ProductDTO.ProductPropertyDTO(p.getName(), p.getValue()))
+                        .collect(Collectors.toSet())
                 )
                 .article1CId(product.getArticle1CId())
                 .build();

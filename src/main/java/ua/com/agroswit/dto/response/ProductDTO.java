@@ -4,14 +4,16 @@ package ua.com.agroswit.dto.response;
 import lombok.Builder;
 import ua.com.agroswit.model.Producer;
 
+import java.util.Collection;
 import java.util.Map;
 
 @Builder
-public record ProductDTO(Long id,
+public record ProductDTO(int id,
                          String name,
-                         Double price,
+                         double price,
                          Producer producer,
-                         Map<String, String> description,
+                         Collection<ProductPropertyDTO> description,
                          Integer article1CId,
-                         SubCategoryDTO subcategory) {
+                         Integer subcategoryId) {
+    public record ProductPropertyDTO(String name, String value) {}
 }

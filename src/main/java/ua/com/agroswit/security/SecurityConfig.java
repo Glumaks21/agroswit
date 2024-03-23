@@ -60,7 +60,7 @@ public class SecurityConfig {
                                 "/api/v1/categories",
                                 "/api/v1/subcategories",
                                 "/api/v1/producers").permitAll()
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll()
                 )
                 .headers(h -> h
                         .frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))

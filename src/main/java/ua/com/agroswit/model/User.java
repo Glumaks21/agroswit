@@ -20,7 +20,7 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = IDENTITY)
-    private Long id;
+    private Integer id;
 
     @Column(length = 20, nullable = false, unique = true)
     private String login;
