@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import ua.com.agroswit.dto.request.ProductCreationDTO;
 import ua.com.agroswit.dto.response.ProductDTO;
 import ua.com.agroswit.dto.response.converter.ProductDTOConverter;
+import ua.com.agroswit.exception.ResourceNotFoundException;
 import ua.com.agroswit.model.Product;
 import ua.com.agroswit.repository.ProducerRepository;
 import ua.com.agroswit.repository.ProductRepository;
@@ -62,7 +63,10 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Product create(ProductCreationDTO dto) {
         var producer = producerRepository.findById(dto.producerId())
-                .orElseThrow(() -> new RuntimeException("Producer with id " + dto.producerId() + " not exists"));
+                .orElseThrow(() -> new ResourceNotFoundException(String.format(
+                        "Producer with id %d not exists", dto.producerId()))
+                );
+
         var product = Product.builder()
                 .name(dto.name())
                 .price(dto.price())

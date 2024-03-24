@@ -19,7 +19,7 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
 
     @Query(value = "SELECT pp.name AS name, ppv.value AS value FROM Product p " +
             "INNER JOIN ProductPropertyValue ppv ON p.id = ppv.productId " +
-            "INNER JOIN SubCategoryProperty pp ON ppv.propertyId = pp.id " +
+            "INNER JOIN CategoryProperty pp ON ppv.propertyId = pp.id " +
             "WHERE p.id = ?1")
     List<ProductPropertyView> findAllPropertiesById(Integer id);
 }

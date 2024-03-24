@@ -35,8 +35,8 @@ public class Product {
     private Producer producer;
 
     @ManyToOne
-    @JoinColumn(name = "subcategory_id")
-    private SubCategory subCategory;
+    @JoinColumn(name = "category_id")
+    private Category category;
 
     @Override
     public final boolean equals(Object o) {

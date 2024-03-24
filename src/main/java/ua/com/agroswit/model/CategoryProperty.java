@@ -15,10 +15,10 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 @RequiredArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "subcategory_property", uniqueConstraints =
-    @UniqueConstraint(name = "subcat_prop_name_subcat_id_uk", columnNames = {"name", "subcategory_id"})
+@Table(name = "category_property", uniqueConstraints =
+    @UniqueConstraint(name = "cat_prop_name_cat_id_uk", columnNames = {"name", "category_id"})
 )
-public class SubCategoryProperty {
+public class CategoryProperty {
 
     @Id
     @GeneratedValue(strategy = IDENTITY)
@@ -29,11 +29,12 @@ public class SubCategoryProperty {
 
     @Enumerated(EnumType.STRING)
     @Column(length = 10, nullable = false)
-    private SubCategoryPropertyTypeE type;
+    private PropertyType type;
 
+    @ToString.Exclude
     @ManyToOne
-    @JoinColumn(name = "subcategory_id", nullable = false)
-    private SubCategory subcategory;
+    @JoinColumn(name = "category_id", nullable = false)
+    private Category category;
 
     @Override
     public final boolean equals(Object o) {
@@ -42,7 +43,7 @@ public class SubCategoryProperty {
         Class<?> oEffectiveClass = o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass() : o.getClass();
         Class<?> thisEffectiveClass = this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass() : this.getClass();
         if (thisEffectiveClass != oEffectiveClass) return false;
-        SubCategoryProperty that = (SubCategoryProperty) o;
+        CategoryProperty that = (CategoryProperty) o;
         return getId() != null && Objects.equals(getId(), that.getId());
     }
 

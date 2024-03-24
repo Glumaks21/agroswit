@@ -17,15 +17,13 @@ import static java.util.stream.Collectors.toMap;
 @RequiredArgsConstructor
 public class ProductDTOConverter {
 
-    private final SubCategoryDTOConverter converter;
-
     public ProductDTO convert(Product product, Collection<ProductPropertyView> properties) {
         return ProductDTO.builder()
                 .id(product.getId())
                 .price(product.getPrice())
                 .name(product.getName())
                 .producer(product.getProducer())
-                .subcategoryId(product.getSubCategory().getId())
+                .subcategoryId(product.getCategory().getId())
                 .description(properties.stream()
                         .map(p -> new ProductDTO.ProductPropertyDTO(p.getName(), p.getValue()))
                         .collect(Collectors.toSet())

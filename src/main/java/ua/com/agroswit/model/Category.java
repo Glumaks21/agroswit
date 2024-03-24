@@ -17,17 +17,28 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 @Getter
 @Setter
 @ToString
+@Table(name = "category", uniqueConstraints = @UniqueConstraint(
+        name = "category_name_parent_cat_id_uk", columnNames = {"name", "parent_category_id"})
+)
 public class Category {
 
     @Id
     @GeneratedValue(strategy = IDENTITY)
     private Integer id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, length = 20)
     private String name;
 
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "category")
-    private Set<SubCategory> subCategories = new HashSet<>();
+    @Column(length = 300)
+    private String description;
+
+    @ManyToOne
+    @JoinColumn(name = "parent_category_id")
+    private Category parentCategory;
+
+    @ToString.Exclude
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
+    private Set<CategoryProperty> properties;
 
     @Override
     public final boolean equals(Object o) {

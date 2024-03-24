@@ -6,6 +6,8 @@ import ua.com.agroswit.model.Category;
 import java.util.List;
 
 public interface CategoryService {
-    List<Category> getAll();
-    Category create(CategoryCreationDTO dto);
+    List<Category> getAllCategories();
+    List<Category> getAllSubcategories(Integer parentId);
+    Category createCategory(CategoryCreationDTO dto);
+    Category createSubcategory(CategoryCreationDTO dto, Integer parentId);
 }
