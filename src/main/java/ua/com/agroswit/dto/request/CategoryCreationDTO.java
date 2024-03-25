@@ -1,10 +1,7 @@
 package ua.com.agroswit.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
-import ua.com.agroswit.dto.response.CategoryDTO;
+import jakarta.validation.constraints.*;
+import ua.com.agroswit.dto.response.CategoryDTO.PropertyDTO;
 
 import java.util.List;
 
@@ -16,7 +13,10 @@ public record CategoryCreationDTO(
         @Size(min = 20, max = 300)
         String description,
 
+        @DecimalMin("1")
+        Integer parentCategoryId,
+
         @NotNull
-        List<CategoryDTO.PropertyDTO> properties
+        List<PropertyDTO> properties
 ) {
 }

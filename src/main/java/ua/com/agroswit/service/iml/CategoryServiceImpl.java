@@ -1,12 +1,13 @@
 package ua.com.agroswit.service.iml;
 
-import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ua.com.agroswit.dto.request.CategoryCreationDTO;
 import ua.com.agroswit.dto.response.CategoryDTO;
+import ua.com.agroswit.dto.response.CategoryDTO.PropertyDTO;
+import ua.com.agroswit.dto.response.converter.CategoryDTOConverter;
 import ua.com.agroswit.exception.RequestValidationException;
 import ua.com.agroswit.exception.ResourceInConflictStateException;
 import ua.com.agroswit.exception.ResourceNotFoundException;
@@ -24,95 +25,82 @@ import java.util.stream.Collectors;
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository repository;
-
+    private final CategoryDTOConverter converter;
 
     @Override
-    public List<Category> getAllCategories() {
-        return repository.findAllByParentCategoryId(null);
+    public List<CategoryDTO> getAllCategories() {
+        return repository.findAllByParentCategoryId(null).stream()
+                .map(converter)
+                .toList();
+    }
+
+    @Override
+    public CategoryDTO getById(Integer id) {
+        return repository.findById(id)
+                .map(converter)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format(
+                        "Category with id %d not found", id))
+                );
     }
 
     @Transactional
     @Override
-    public List<Category> getAllSubcategories(Integer id) {
-        if (!repository.existsById(id)) {
-            throw new ResourceNotFoundException("Category with id " + id + " not exists");
-        }
-        return repository.findAllByParentCategoryId(id);
-    }
-
-    @Transactional
-    @Override
-    public Category createCategory(CategoryCreationDTO dto) {
-        dto.properties().forEach(p1 -> dto.properties().stream()
-                .filter(p2 -> p1.name().equals(p2.name()))
-                .findFirst()
-                .ifPresent(identical -> {
-                    throw new RequestValidationException("properties", String.format(
-                            "There are identical names is properties: %s", identical.name())
-                    );
-                })
-        );
+    public CategoryDTO create(CategoryCreationDTO dto) {
+        validateProperties(dto.properties());
 
         if (repository.existsByName(dto.name())) {
             throw new ResourceInConflictStateException(String.format(
                     "Category with name %s already exists", dto.name())
             );
+        }
+
+        Category parentCategory = null;
+        if (dto.parentCategoryId() != null) {
+            parentCategory = repository.findById(dto.parentCategoryId())
+                    .orElseThrow(() -> new ResourceNotFoundException(String.format(
+                            "Parent category with id %d not found", dto.parentCategoryId()))
+                    );
         }
 
         var category = new Category();
+
         var properties = dto.properties().stream()
-                        .map(pdto -> CategoryProperty.builder()
-                                .name(pdto.name())
-                                .type(pdto.type())
-                                .category(category)
-                                .build())
-                        .collect(Collectors.toSet());
-        category.setProperties(properties);
+                .map(pdto -> CategoryProperty.builder()
+                        .name(pdto.name())
+                        .type(pdto.type())
+                        .category(category)
+                        .build())
+                .collect(Collectors.toSet());
+
         category.setName(dto.name());
         category.setDescription(dto.description());
+        category.setParentCategory(parentCategory);
+        category.setProperties(properties);
+
 
         log.info("Saving new category to db: {}", category);
-        return repository.save(category);
+        return converter.apply(repository.save(category));
     }
 
-    @Transactional
-    @Override
-    public Category createSubcategory(CategoryCreationDTO dto, Integer parentId) {
-        dto.properties().forEach(p1 -> dto.properties().stream()
-                .filter(p2 -> p1.name().equals(p2.name()))
-                .findFirst()
-                .ifPresent(identical -> {
-                    throw new ValidationException(String.format(
-                            "There are identical names is properties: %s", identical.name())
+    private void validateProperties(List<PropertyDTO> properties) {
+        for (var i = 0; i < properties.size(); i++) {
+            var prop = properties.get(i);
+
+            for (var j = i + 1; j < properties.size(); j++) {
+                var propToCompare = properties.get(j);
+
+                if (prop.name().equals(propToCompare.name())) {
+                    throw new RequestValidationException("properties", String.format(
+                            "There are identical names in properties: %s", prop.name())
                     );
-                })
-        );
-
-        if (repository.existsByName(dto.name())) {
-            throw new ResourceInConflictStateException(String.format(
-                    "Category with name %s already exists", dto.name())
-            );
+                }
+            }
         }
+    }
 
-        var parentCategory = repository.findById(parentId)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format(
-                        "Category with id %d not found", parentId))
-                );
-
-        var subcategory = new Category();
-        var properties = dto.properties().stream()
-                        .map(pdto -> CategoryProperty.builder()
-                                .name(pdto.name())
-                                .type(pdto.type())
-                                .category(subcategory)
-                                .build())
-                        .collect(Collectors.toSet());
-        subcategory.setName(dto.name());
-        subcategory.setDescription(dto.description());
-        subcategory.setProperties(properties);
-        subcategory.setParentCategory(parentCategory);
-
-        log.info("Saving subcategory to db: {}", subcategory);
-        return repository.save(subcategory);
+    @Override
+    public void deleteById(Integer id) {
+        log.info("Deleting category with id {} from db", id);
+        repository.deleteById(id);
     }
 }

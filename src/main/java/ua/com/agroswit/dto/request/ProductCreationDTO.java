@@ -1,16 +1,25 @@
 package ua.com.agroswit.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.validation.constraints.*;
+import ua.com.agroswit.dto.response.ProductDTO;
+
+import java.util.Set;
 
 public record ProductCreationDTO(
         @NotBlank
+        @Size(min = 2, max = 30)
         String name,
+
         @Positive
         @NotNull
-        Double price,
+        Integer producerId,
+
         @Positive
         @NotNull
-        Integer producerId) {
+        Integer categoryId,
+
+        @NotEmpty
+        Set<ProductDTO.PackageDTO> packages
+) {
 }

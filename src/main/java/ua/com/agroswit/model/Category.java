@@ -1,10 +1,7 @@
 package ua.com.agroswit.model;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.hibernate.proxy.HibernateProxy;
 
 import java.util.HashSet;
@@ -17,16 +14,13 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 @Getter
 @Setter
 @ToString
-@Table(name = "category", uniqueConstraints = @UniqueConstraint(
-        name = "category_name_parent_cat_id_uk", columnNames = {"name", "parent_category_id"})
-)
 public class Category {
 
     @Id
     @GeneratedValue(strategy = IDENTITY)
     private Integer id;
 
-    @Column(nullable = false, length = 20)
+    @Column(nullable = false, length = 30, unique = true)
     private String name;
 
     @Column(length = 300)
@@ -35,6 +29,10 @@ public class Category {
     @ManyToOne
     @JoinColumn(name = "parent_category_id")
     private Category parentCategory;
+
+    @ToString.Exclude
+    @OneToMany(mappedBy = "parentCategory")
+    private Set<Category> subcategories;
 
     @ToString.Exclude
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)

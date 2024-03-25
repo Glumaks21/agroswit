@@ -13,11 +13,13 @@ import java.util.Optional;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Integer> {
+    boolean existsByName(String name);
+    boolean existsByArticle1CId(Integer article1CId);
     Optional<Product> findByName(String name);
 
     Page<Product> findByProducerId(Integer id, Pageable pageable);
 
-    @Query(value = "SELECT pp.name AS name, ppv.value AS value FROM Product p " +
+    @Query(value = "SELECT pp.name AS name, pp.type as type, ppv.value AS value FROM Product p " +
             "INNER JOIN ProductPropertyValue ppv ON p.id = ppv.productId " +
             "INNER JOIN CategoryProperty pp ON ppv.propertyId = pp.id " +
             "WHERE p.id = ?1")

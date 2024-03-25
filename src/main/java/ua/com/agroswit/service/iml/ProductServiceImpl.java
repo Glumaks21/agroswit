@@ -8,13 +8,16 @@ import org.springframework.stereotype.Service;
 import ua.com.agroswit.dto.request.ProductCreationDTO;
 import ua.com.agroswit.dto.response.ProductDTO;
 import ua.com.agroswit.dto.response.converter.ProductDTOConverter;
+import ua.com.agroswit.exception.ResourceInConflictStateException;
 import ua.com.agroswit.exception.ResourceNotFoundException;
+import ua.com.agroswit.model.Package;
 import ua.com.agroswit.model.Product;
 import ua.com.agroswit.repository.ProducerRepository;
 import ua.com.agroswit.repository.ProductRepository;
 import ua.com.agroswit.service.ProductService;
 
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -62,14 +65,28 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Product create(ProductCreationDTO dto) {
+        if (productRepository.existsByName(dto.name())) {
+            throw new ResourceInConflictStateException(String.format(
+                    "Product with name %s already exists", dto.name())
+            );
+        }
+
         var producer = producerRepository.findById(dto.producerId())
                 .orElseThrow(() -> new ResourceNotFoundException(String.format(
                         "Producer with id %d not exists", dto.producerId()))
                 );
 
+        var packages = dto.packages().stream()
+                .map(m -> Package.builder()
+                        .price(m.price())
+                        .volume(m.volume())
+                        .unit(m.unit())
+                        .build())
+                .collect(Collectors.toSet());
+
         var product = Product.builder()
                 .name(dto.name())
-                .price(dto.price())
+                .packages(packages)
                 .producer(producer)
                 .build();
 
