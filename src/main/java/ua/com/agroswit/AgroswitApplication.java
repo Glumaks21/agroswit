@@ -12,8 +12,4 @@ public class AgroswitApplication {
         SpringApplication.run(AgroswitApplication.class, args);
     }
 
-    @Bean
-    RestClient restClient() {
-        return RestClient.create();
-    }
 }

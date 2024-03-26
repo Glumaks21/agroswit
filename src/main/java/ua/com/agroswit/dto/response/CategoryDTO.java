@@ -9,6 +9,7 @@ import java.util.Collection;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Builder
 public record CategoryDTO(
+
         Integer id,
         String name,
         String description,
@@ -16,6 +17,7 @@ public record CategoryDTO(
         Collection<SimplifiedCategoryDTO> subcategories,
         Collection<PropertyDTO> properties
 ) {
+
     public record PropertyDTO(String name, PropertyType type) {
     }
 }

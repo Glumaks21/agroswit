@@ -5,19 +5,20 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ua.com.agroswit.dto.request.ProductCreationDTO;
 import ua.com.agroswit.dto.response.ProductDTO;
-import ua.com.agroswit.dto.response.converter.ProductDTOConverter;
+import ua.com.agroswit.dto.response.mappers.ProductMapper;
 import ua.com.agroswit.exception.ResourceInConflictStateException;
 import ua.com.agroswit.exception.ResourceNotFoundException;
-import ua.com.agroswit.model.Package;
 import ua.com.agroswit.model.Product;
+import ua.com.agroswit.repository.CategoryRepository;
+import ua.com.agroswit.repository.PackageRepository;
 import ua.com.agroswit.repository.ProducerRepository;
 import ua.com.agroswit.repository.ProductRepository;
 import ua.com.agroswit.service.ProductService;
 
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -25,46 +26,41 @@ import java.util.stream.Collectors;
 public class ProductServiceImpl implements ProductService {
 
     private final ProducerRepository producerRepository;
+    private final CategoryRepository categoryRepository;
+    private final PackageRepository packageRepository;
     private final ProductRepository productRepository;
-    private final ProductDTOConverter converter;
+    private final ProductMapper mapper;
 
     @Override
     public Page<ProductDTO> getAll(Pageable pageable) {
         var productPage = productRepository.findAll(pageable);
 
-        return productPage.map(p -> converter.convert(
-                p, productRepository.findAllPropertiesById(p.getId())
-        ));
+        return productPage.map(mapper::toDTO);
     }
 
     @Override
     public Page<ProductDTO> getAllByProducer(Integer producerId, Pageable pageable) {
         var productPage = productRepository.findByProducerId(producerId, pageable);
-        return productPage.map(p -> converter.convert(
-                p, productRepository.findAllPropertiesById(p.getId())
-        ));
+        return productPage.map(mapper::toDTO);
     }
 
     @Override
     public Optional<ProductDTO> getById(Integer id) {
         var product = productRepository.findById(id);
 
-        System.out.println(productRepository.findAllPropertiesById(id));
-        return product.map((p) -> converter.convert(
-                p, productRepository.findAllPropertiesById(id)));
+        return product.map(mapper::toDTO);
     }
 
     @Override
     public Optional<ProductDTO> getByName(String name) {
         var product = productRepository.findByName(name);
 
-        return product.map((p) -> converter.convert(
-                p, productRepository.findAllPropertiesById(p.getId())
-        ));
+        return product.map(mapper::toDTO);
     }
 
+    @Transactional
     @Override
-    public Product create(ProductCreationDTO dto) {
+    public ProductDTO create(ProductCreationDTO dto) {
         if (productRepository.existsByName(dto.name())) {
             throw new ResourceInConflictStateException(String.format(
                     "Product with name %s already exists", dto.name())
@@ -73,29 +69,30 @@ public class ProductServiceImpl implements ProductService {
 
         var producer = producerRepository.findById(dto.producerId())
                 .orElseThrow(() -> new ResourceNotFoundException(String.format(
-                        "Producer with id %d not exists", dto.producerId()))
+                        "Producer with id %d not found", dto.producerId()))
+                );
+        var category = categoryRepository.findById(dto.categoryId())
+                .orElseThrow(() -> new ResourceNotFoundException(String.format(
+                        "Category with id %d not exists", dto.categoryId()))
                 );
 
-        var packages = dto.packages().stream()
-                .map(m -> Package.builder()
-                        .price(m.price())
-                        .volume(m.volume())
-                        .unit(m.unit())
-                        .build())
-                .collect(Collectors.toSet());
-
-        var product = Product.builder()
-                .name(dto.name())
-                .packages(packages)
-                .producer(producer)
-                .build();
+        var product = mapper.toEntity(dto);
+        product.setProducer(producer);
+        product.setCategory(category);
 
         log.info("Saving product: {}", product);
-        return productRepository.save(product);
+        productRepository.save(product);
+
+        product.getPackages().forEach(p -> p.setProductId(product.getId()));
+
+        log.info("Saving product packages: {}", product);
+        packageRepository.saveAll(product.getPackages());
+
+        return mapper.toDTO(product);
     }
 
     @Override
-    public Product update() {
+    public ProductDTO update() {
         return null;
     }
 

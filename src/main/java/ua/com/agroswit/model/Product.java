@@ -41,7 +41,7 @@ public class Product {
     @JoinColumn(name = "category_id")
     private Category category;
 
-    @OneToMany(mappedBy = "productId", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "productId", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
     private Set<Package> packages;
 
     @Override

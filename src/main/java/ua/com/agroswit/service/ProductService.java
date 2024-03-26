@@ -13,7 +13,7 @@ public interface ProductService {
     Page<ProductDTO> getAllByProducer(Integer producerId, Pageable pageable);
     Optional<ProductDTO> getById(Integer id);
     Optional<ProductDTO> getByName(String name);
-    Product create(ProductCreationDTO dto);
-    Product update();
+    ProductDTO create(ProductCreationDTO dto);
+    ProductDTO update();
     void delete(Integer id);
 }

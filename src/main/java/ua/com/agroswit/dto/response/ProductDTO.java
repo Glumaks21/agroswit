@@ -9,7 +9,7 @@ import ua.com.agroswit.model.PropertyType;
 
 import java.util.Collection;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
+//@JsonInclude(JsonInclude.Include.NON_NULL)
 @Builder
 public record ProductDTO(
         Integer id,
@@ -20,7 +20,7 @@ public record ProductDTO(
         Integer article1CId,
         Collection<ProductPropertyDTO> properties,
         Collection<PackageDTO> packages,
-        Integer subcategoryId) {
+        Integer categoryId) {
     public record ProductPropertyDTO(String name, PropertyType type, String value) {
     }
 

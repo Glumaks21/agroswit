@@ -7,17 +7,15 @@ import org.springframework.transaction.annotation.Transactional;
 import ua.com.agroswit.dto.request.CategoryCreationDTO;
 import ua.com.agroswit.dto.response.CategoryDTO;
 import ua.com.agroswit.dto.response.CategoryDTO.PropertyDTO;
-import ua.com.agroswit.dto.response.converter.CategoryDTOConverter;
+import ua.com.agroswit.dto.response.mappers.CategoryMapper;
 import ua.com.agroswit.exception.RequestValidationException;
 import ua.com.agroswit.exception.ResourceInConflictStateException;
 import ua.com.agroswit.exception.ResourceNotFoundException;
 import ua.com.agroswit.model.Category;
-import ua.com.agroswit.model.CategoryProperty;
 import ua.com.agroswit.repository.CategoryRepository;
 import ua.com.agroswit.service.CategoryService;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -25,19 +23,19 @@ import java.util.stream.Collectors;
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository repository;
-    private final CategoryDTOConverter converter;
+    private final CategoryMapper mapper;
 
     @Override
     public List<CategoryDTO> getAllCategories() {
         return repository.findAllByParentCategoryId(null).stream()
-                .map(converter)
+                .map(mapper::toDTO)
                 .toList();
     }
 
     @Override
     public CategoryDTO getById(Integer id) {
         return repository.findById(id)
-                .map(converter)
+                .map(mapper::toDTO)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format(
                         "Category with id %d not found", id))
                 );
@@ -62,24 +60,12 @@ public class CategoryServiceImpl implements CategoryService {
                     );
         }
 
-        var category = new Category();
-
-        var properties = dto.properties().stream()
-                .map(pdto -> CategoryProperty.builder()
-                        .name(pdto.name())
-                        .type(pdto.type())
-                        .category(category)
-                        .build())
-                .collect(Collectors.toSet());
-
-        category.setName(dto.name());
-        category.setDescription(dto.description());
+        var category = mapper.toEntity(dto);
         category.setParentCategory(parentCategory);
-        category.setProperties(properties);
-
+        category.getProperties().forEach(p -> p.setCategory(category));
 
         log.info("Saving new category to db: {}", category);
-        return converter.apply(repository.save(category));
+        return mapper.toDTO(repository.save(category));
     }
 
     private void validateProperties(List<PropertyDTO> properties) {

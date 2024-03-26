@@ -58,7 +58,7 @@ public class ProductController {
 
     @Operation(summary = "Create product")
     @PostMapping(consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-    Product create(@RequestBody @Validated ProductCreationDTO dto) {
+    ProductDTO create(@RequestBody @Validated ProductCreationDTO dto) {
         log.info("Received product creation request with dto: {}", dto);
         return service.create(dto);
     }
