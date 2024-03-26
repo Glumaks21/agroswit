@@ -47,14 +47,13 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Optional<ProductDTO> getById(Integer id) {
         var product = productRepository.findById(id);
-
+        System.out.println(product);
         return product.map(mapper::toDTO);
     }
 
     @Override
     public Optional<ProductDTO> getByName(String name) {
         var product = productRepository.findByName(name);
-
         return product.map(mapper::toDTO);
     }
 

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import ua.com.agroswit.dto.request.SignInRequest;
 import ua.com.agroswit.dto.request.SignUpRequest;
 import ua.com.agroswit.exception.ResourceInConflictStateException;
-import ua.com.agroswit.model.RoleE;
+import ua.com.agroswit.model.enums.RoleE;
 import ua.com.agroswit.model.User;
 import ua.com.agroswit.repository.UserRepository;
 

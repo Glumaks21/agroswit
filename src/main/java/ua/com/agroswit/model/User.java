@@ -5,8 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
+import ua.com.agroswit.model.enums.RoleE;
 
 import static jakarta.persistence.GenerationType.IDENTITY;
 

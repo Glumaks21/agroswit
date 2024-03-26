@@ -3,6 +3,7 @@ package ua.com.agroswit.model;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.proxy.HibernateProxy;
+import ua.com.agroswit.model.enums.MeasurementUnitE;
 
 import java.util.Objects;
 
@@ -26,7 +27,7 @@ public class Package {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private MeasurementUnit unit;
+    private MeasurementUnitE unit;
 
     @Override
     public final boolean equals(Object o) {

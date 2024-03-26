@@ -31,11 +31,11 @@ VALUES ('олійність', 'TEXT', 6),
        ('супротив до вовчка', 'TEXT', 6),
        ('збирання', 'TEXT', 6);
 
-INSERT INTO product(name, producer_id, category_id, article_1c_id)
-VALUES ('Рейна',  6, 6, 1),
-       ('ДуетКЛ', 6, 6, 2),
-       ('Еленіс', 7, 6, 3),
-       ('Харнес®, КЕ', 7, 4, 4);
+INSERT INTO product(name, image_url, producer_id, category_id, article_1c_id)
+VALUES ('Рейна', 'https://agroswit.com.ua/image/cache/catalog/Seeds/01-reyna-500x500.png ', 6, 6, 1),
+       ('ДуетКЛ', 'https://agroswit.com.ua/image/cache/catalog/Seeds/04-duet-500x500.png', 6, 6, 2),
+       ('Еленіс', 'https://agroswit.com.ua/image/cache/catalog/Seeds/55-elenis-1-500x500.png', 7, 6, 3),
+       ('Харнес®, КЕ', 'https://agroswit.com.ua/image/cache/catalog/ZZR/02-harnes-500x500.png', 7, 4, 4);
 
 INSERT INTO package(price, product_id, volume, unit)
 VALUES (5000, 1, 100, 'BAG'),

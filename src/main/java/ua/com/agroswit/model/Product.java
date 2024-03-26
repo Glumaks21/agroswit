@@ -4,16 +4,19 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.proxy.HibernateProxy;
 
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
+import static jakarta.persistence.CascadeType.REMOVE;
+import static jakarta.persistence.FetchType.EAGER;
 import static jakarta.persistence.GenerationType.IDENTITY;
 
 @Entity
 @Getter
 @Setter
 @ToString
-@RequiredArgsConstructor
+@NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class Product {
@@ -41,8 +44,11 @@ public class Product {
     @JoinColumn(name = "category_id")
     private Category category;
 
-    @OneToMany(mappedBy = "productId", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
-    private Set<Package> packages;
+    @OneToMany(mappedBy = "productId", fetch = EAGER, cascade = REMOVE)
+    private Set<Package> packages = new HashSet<>();
+
+    @OneToMany(mappedBy = "product", fetch = EAGER)
+    private Set<ProductPropertyValue> properties = new HashSet<>();
 
     @Override
     public final boolean equals(Object o) {

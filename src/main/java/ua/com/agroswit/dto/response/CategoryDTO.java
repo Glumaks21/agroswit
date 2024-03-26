@@ -2,7 +2,7 @@ package ua.com.agroswit.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
-import ua.com.agroswit.model.PropertyType;
+import ua.com.agroswit.model.enums.PropertyTypeE;
 
 import java.util.Collection;
 
@@ -18,6 +18,6 @@ public record CategoryDTO(
         Collection<PropertyDTO> properties
 ) {
 
-    public record PropertyDTO(String name, PropertyType type) {
+    public record PropertyDTO(String name, PropertyTypeE type) {
     }
 }

@@ -1,9 +1,9 @@
 package ua.com.agroswit.repository.view;
 
-import ua.com.agroswit.model.PropertyType;
+import ua.com.agroswit.model.enums.PropertyTypeE;
 
 public interface ProductPropertyView {
     String getName();
-    PropertyType getType();
+    PropertyTypeE getType();
     String getValue();
 }
