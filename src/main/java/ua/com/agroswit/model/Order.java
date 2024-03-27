@@ -1,41 +1,48 @@
 package ua.com.agroswit.model;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.proxy.HibernateProxy;
-import ua.com.agroswit.model.enums.MeasurementUnitE;
+import ua.com.agroswit.model.enums.OrderStateE;
 
+import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
+import static jakarta.persistence.FetchType.EAGER;
 import static jakarta.persistence.GenerationType.IDENTITY;
 
 @Getter
 @Setter
 @ToString
 @RequiredArgsConstructor
-@AllArgsConstructor
-@Builder
 @Entity
-public class Package {
+@Table(name = "orders")
+public class Order {
 
     @Id
     @GeneratedValue(strategy = IDENTITY)
     private Integer id;
 
-    @Column(nullable = false)
-    private Double price;
-
-    @Column(nullable = false)
-    private Integer volume;
-
-    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private MeasurementUnitE unit;
+    @CollectionTable(name = "order_state",
+            joinColumns = @JoinColumn(name = "state_id", nullable = false)
+    )
+    private OrderStateE state;
 
-    @ToString.Exclude
+    @Column(nullable = false)
+    private LocalDateTime createdAt;
+
     @ManyToOne
-    @JoinColumn(name = "product_id", nullable = false)
-    private Product product;
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    @OneToMany(mappedBy = "orderId", fetch = EAGER)
+    private Set<OrderItem> items = new HashSet<>();
 
     @Override
     public final boolean equals(Object o) {
@@ -44,8 +51,8 @@ public class Package {
         Class<?> oEffectiveClass = o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass() : o.getClass();
         Class<?> thisEffectiveClass = this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass() : this.getClass();
         if (thisEffectiveClass != oEffectiveClass) return false;
-        Package aPackage = (Package) o;
-        return getId() != null && Objects.equals(getId(), aPackage.getId());
+        Order order = (Order) o;
+        return getId() != null && Objects.equals(getId(), order.getId());
     }
 
     @Override

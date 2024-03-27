@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
+import static jakarta.persistence.CascadeType.ALL;
 import static jakarta.persistence.CascadeType.REMOVE;
 import static jakarta.persistence.FetchType.EAGER;
 import static jakarta.persistence.GenerationType.IDENTITY;
@@ -44,7 +45,7 @@ public class Product {
     @JoinColumn(name = "category_id")
     private Category category;
 
-    @OneToMany(mappedBy = "productId", fetch = EAGER, cascade = REMOVE)
+    @OneToMany(mappedBy = "product", fetch = EAGER, cascade = ALL)
     private Set<Package> packages = new HashSet<>();
 
     @OneToMany(mappedBy = "product", fetch = EAGER)

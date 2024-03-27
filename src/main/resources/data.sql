@@ -51,3 +51,16 @@ VALUES (1, 1, '48-52'),
 
 INSERT INTO users(login, password, role)
 VALUES ('glumaks21', '$2a$10$8uyWkYjmBFy.Rk9N6iQJDet0JF01EhxubbelUOGLF.KVs9BSnWj5C', 'ADMIN');
+
+INSERT INTO order_state(name)
+VALUES ('RECEIVED'),
+       ('PROCEED'),
+       ('REVIEW'),
+       ('ACCEPTED'),
+       ('ABORTED');
+
+INSERT INTO orders(state, user_id)
+VALUES ('RECEIVED', 1);
+
+INSERT INTO order_items(order_id, product_id, package_id, count)
+VALUES (1, 1, 1, 10);

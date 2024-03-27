@@ -3,39 +3,30 @@ package ua.com.agroswit.model;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.proxy.HibernateProxy;
-import ua.com.agroswit.model.enums.MeasurementUnitE;
 
 import java.util.Objects;
-
-import static jakarta.persistence.GenerationType.IDENTITY;
 
 @Getter
 @Setter
 @ToString
 @RequiredArgsConstructor
-@AllArgsConstructor
-@Builder
 @Entity
-public class Package {
+@Table(name = "order_items")
+public class OrderItem {
 
     @Id
-    @GeneratedValue(strategy = IDENTITY)
-    private Integer id;
+    private Integer orderId;
 
-    @Column(nullable = false)
-    private Double price;
-
-    @Column(nullable = false)
-    private Integer volume;
-
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private MeasurementUnitE unit;
-
-    @ToString.Exclude
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
+
+    @OneToOne
+    @JoinColumn(name = "package_id", nullable = false)
+    private Package productPackage;
+
+    @Column(nullable = false)
+    private Integer count;
 
     @Override
     public final boolean equals(Object o) {
@@ -44,8 +35,8 @@ public class Package {
         Class<?> oEffectiveClass = o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass() : o.getClass();
         Class<?> thisEffectiveClass = this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass() : this.getClass();
         if (thisEffectiveClass != oEffectiveClass) return false;
-        Package aPackage = (Package) o;
-        return getId() != null && Objects.equals(getId(), aPackage.getId());
+        OrderItem orderItem = (OrderItem) o;
+        return getOrderId() != null && Objects.equals(getOrderId(), orderItem.getOrderId());
     }
 
     @Override

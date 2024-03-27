@@ -11,9 +11,7 @@ import ua.com.agroswit.dto.response.ProductDTO;
 import ua.com.agroswit.dto.response.mappers.ProductMapper;
 import ua.com.agroswit.exception.ResourceInConflictStateException;
 import ua.com.agroswit.exception.ResourceNotFoundException;
-import ua.com.agroswit.model.Product;
 import ua.com.agroswit.repository.CategoryRepository;
-import ua.com.agroswit.repository.PackageRepository;
 import ua.com.agroswit.repository.ProducerRepository;
 import ua.com.agroswit.repository.ProductRepository;
 import ua.com.agroswit.service.ProductService;
@@ -27,7 +25,6 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProducerRepository producerRepository;
     private final CategoryRepository categoryRepository;
-    private final PackageRepository packageRepository;
     private final ProductRepository productRepository;
     private final ProductMapper mapper;
 
@@ -47,7 +44,6 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Optional<ProductDTO> getById(Integer id) {
         var product = productRepository.findById(id);
-        System.out.println(product);
         return product.map(mapper::toDTO);
     }
 
@@ -78,14 +74,10 @@ public class ProductServiceImpl implements ProductService {
         var product = mapper.toEntity(dto);
         product.setProducer(producer);
         product.setCategory(category);
+        product.getPackages().forEach(p -> p.setProduct(product));
 
         log.info("Saving product: {}", product);
         productRepository.save(product);
-
-        product.getPackages().forEach(p -> p.setProductId(product.getId()));
-
-        log.info("Saving product packages: {}", product);
-        packageRepository.saveAll(product.getPackages());
 
         return mapper.toDTO(product);
     }
