@@ -1,4 +1,4 @@
-package ua.com.agroswit.dto.response;
+package ua.com.agroswit.dto;
 
 
 import lombok.Builder;

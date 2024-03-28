@@ -1,8 +1,8 @@
-package ua.com.agroswit.dto.response.mappers;
+package ua.com.agroswit.dto.mappers;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import ua.com.agroswit.dto.response.OrderDTO;
+import ua.com.agroswit.dto.OrderDTO;
 import ua.com.agroswit.model.Order;
 
 @Mapper(componentModel = "spring", uses = OrderItemMapper.class)

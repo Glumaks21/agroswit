@@ -2,8 +2,8 @@ package ua.com.agroswit.service.iml;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ua.com.agroswit.dto.response.OrderDTO;
-import ua.com.agroswit.dto.response.mappers.OrderMapper;
+import ua.com.agroswit.dto.OrderDTO;
+import ua.com.agroswit.dto.mappers.OrderMapper;
 import ua.com.agroswit.repository.OrderRepository;
 import ua.com.agroswit.service.OrderService;
 

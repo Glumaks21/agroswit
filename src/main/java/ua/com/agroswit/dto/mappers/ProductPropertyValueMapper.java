@@ -1,8 +1,8 @@
-package ua.com.agroswit.dto.response.mappers;
+package ua.com.agroswit.dto.mappers;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import ua.com.agroswit.dto.response.ProductDTO;
+import ua.com.agroswit.dto.ProductDTO;
 import ua.com.agroswit.model.ProductPropertyValue;
 
 @Mapper(componentModel = "spring")

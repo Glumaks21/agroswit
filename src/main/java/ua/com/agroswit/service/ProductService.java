@@ -3,8 +3,7 @@ package ua.com.agroswit.service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import ua.com.agroswit.dto.request.ProductCreationDTO;
-import ua.com.agroswit.dto.response.ProductDTO;
-import ua.com.agroswit.model.Product;
+import ua.com.agroswit.dto.ProductDTO;
 
 import java.util.Optional;
 

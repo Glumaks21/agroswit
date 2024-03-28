@@ -13,8 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ua.com.agroswit.dto.request.ProductCreationDTO;
-import ua.com.agroswit.dto.response.ProductDTO;
-import ua.com.agroswit.model.Product;
+import ua.com.agroswit.dto.ProductDTO;
 import ua.com.agroswit.service.ProductService;
 
 import java.util.List;

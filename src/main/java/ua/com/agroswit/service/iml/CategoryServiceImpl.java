@@ -4,10 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ua.com.agroswit.dto.request.CategoryCreationDTO;
-import ua.com.agroswit.dto.response.CategoryDTO;
-import ua.com.agroswit.dto.response.CategoryDTO.PropertyDTO;
-import ua.com.agroswit.dto.response.mappers.CategoryMapper;
+import ua.com.agroswit.dto.CategoryDTO;
+import ua.com.agroswit.dto.CategoryDTO.PropertyDTO;
+import ua.com.agroswit.dto.mappers.CategoryMapper;
 import ua.com.agroswit.exception.RequestValidationException;
 import ua.com.agroswit.exception.ResourceInConflictStateException;
 import ua.com.agroswit.exception.ResourceNotFoundException;
@@ -41,9 +40,9 @@ public class CategoryServiceImpl implements CategoryService {
                 );
     }
 
-    @Transactional
     @Override
-    public CategoryDTO create(CategoryCreationDTO dto) {
+    @Transactional
+    public CategoryDTO create(CategoryDTO dto) {
         validateProperties(dto.properties());
 
         if (repository.existsByName(dto.name())) {
@@ -65,6 +64,20 @@ public class CategoryServiceImpl implements CategoryService {
         category.getProperties().forEach(p -> p.setCategory(category));
 
         log.info("Saving new category to db: {}", category);
+        return mapper.toDTO(repository.save(category));
+    }
+
+    @Override
+    @Transactional
+    public CategoryDTO updateById(Integer id, CategoryDTO dto) {
+        var category = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format(
+                        "Category with id %d not found", id))
+                );
+
+        mapper.updateFromDTO(dto, category);
+
+        log.info("Updating category in db: {}", category);
         return mapper.toDTO(repository.save(category));
     }
 

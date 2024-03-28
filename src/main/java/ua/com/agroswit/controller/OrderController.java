@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ua.com.agroswit.dto.response.OrderDTO;
+import ua.com.agroswit.dto.OrderDTO;
 import ua.com.agroswit.service.OrderService;
 
 import java.util.Collection;

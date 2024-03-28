@@ -1,8 +1,7 @@
 package ua.com.agroswit.dto.request;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.*;
-import ua.com.agroswit.dto.response.ProductDTO;
+import ua.com.agroswit.dto.ProductDTO;
 
 import java.util.Set;
 

@@ -1,4 +1,4 @@
-package ua.com.agroswit.dto.response;
+package ua.com.agroswit.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;

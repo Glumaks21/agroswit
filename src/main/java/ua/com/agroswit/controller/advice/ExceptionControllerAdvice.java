@@ -1,11 +1,10 @@
 package ua.com.agroswit.controller.advice;
 
-import jakarta.validation.ValidationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ua.com.agroswit.dto.response.ErrorDescriptionDTO;
+import ua.com.agroswit.dto.ErrorDescriptionDTO;
 import ua.com.agroswit.exception.RequestValidationException;
 import ua.com.agroswit.exception.ResourceInConflictStateException;
 import ua.com.agroswit.exception.ResourceNotFoundException;

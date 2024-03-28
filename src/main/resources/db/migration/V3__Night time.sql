@@ -16,7 +16,7 @@ create table subcategory
 create table subcategory_property
 (
     id   integer not null auto_increment,
-    name varchar(255) not null,
+    name varchar(50) not null,
     subcategory_id integer not null,
     type enum ('TEXT','NUMBER') not null,
     primary key (id)

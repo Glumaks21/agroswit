@@ -1,6 +1,6 @@
 package ua.com.agroswit.service;
 
-import ua.com.agroswit.dto.response.OrderDTO;
+import ua.com.agroswit.dto.OrderDTO;
 
 import java.util.List;
 
