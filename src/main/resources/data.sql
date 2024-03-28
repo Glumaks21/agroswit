@@ -32,7 +32,7 @@ VALUES ('олійність', 'TEXT', 6),
        ('збирання', 'TEXT', 6);
 
 INSERT INTO product(name, image_url, producer_id, category_id, article_1c_id)
-VALUES ('Рейна', 'https://agroswit.com.ua/image/cache/catalog/Seeds/01-reyna-500x500.png ', 6, 6, 1),
+VALUES ('Рейна', 'https://agroswit.com.ua/image/cache/catalog/Seeds/01-reyna-500x500.png', 6, 6, 1),
        ('ДуетКЛ', 'https://agroswit.com.ua/image/cache/catalog/Seeds/04-duet-500x500.png', 6, 6, 2),
        ('Еленіс', 'https://agroswit.com.ua/image/cache/catalog/Seeds/55-elenis-1-500x500.png', 7, 6, 3),
        ('Харнес®, КЕ', 'https://agroswit.com.ua/image/cache/catalog/ZZR/02-harnes-500x500.png', 7, 4, 4);
@@ -50,7 +50,14 @@ VALUES (1, 1, '48-52'),
        (1, 8, 'до 8 рас');
 
 INSERT INTO users(login, password, role)
-VALUES ('glumaks21', '$2a$10$8uyWkYjmBFy.Rk9N6iQJDet0JF01EhxubbelUOGLF.KVs9BSnWj5C', 'ADMIN');
+VALUES ('glumaks21', '$2a$10$8uyWkYjmBFy.Rk9N6iQJDet0JF01EhxubbelUOGLF.KVs9BSnWj5C', 'ADMIN'),
+       ('customer', 'qwerty', 'USER');
+
+INSERT INTO customer(user_id, type)
+VALUES ( 2, 'PERSON' );
+
+INSERT INTO person_details(customer_id, name, surname, patronymic)
+VALUES ( 1, 'Михайло', 'Недобіткін', 'Вікторович');
 
 INSERT INTO order_state(name)
 VALUES ('RECEIVED'),
@@ -59,7 +66,7 @@ VALUES ('RECEIVED'),
        ('ACCEPTED'),
        ('ABORTED');
 
-INSERT INTO orders(state, user_id)
+INSERT INTO orders(state, customer_id)
 VALUES ('RECEIVED', 1);
 
 INSERT INTO order_items(order_id, product_id, package_id, count)

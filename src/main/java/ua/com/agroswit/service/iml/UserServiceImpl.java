@@ -3,12 +3,13 @@ package ua.com.agroswit.service.iml;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ua.com.agroswit.model.User;
+import ua.com.agroswit.dto.UserDTO;
+import ua.com.agroswit.dto.mappers.UserMapper;
+import ua.com.agroswit.exception.ResourceNotFoundException;
 import ua.com.agroswit.repository.UserRepository;
 import ua.com.agroswit.service.UserService;
 
 import java.util.List;
-import java.util.Optional;
 
 
 @Slf4j
@@ -17,19 +18,21 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository repository;
+    private final UserMapper mapper;
 
     @Override
-    public Optional<User> getById(Integer id) {
-        return repository.findById(id);
+    public List<UserDTO> getAll() {
+        return repository.findAll().stream()
+                .map(mapper::toDTO)
+                .toList();
     }
 
     @Override
-    public List<User> getAll() {
-        return repository.findAll();
-    }
-
-    @Override
-    public Optional<User> getByLogin(String login) {
-        return repository.findByLogin(login);
+    public UserDTO getById(Integer id) {
+        return repository.findById(id)
+                .map(mapper::toDTO)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format(
+                        "User with id %d not found", id))
+                );
     }
 }

@@ -1,19 +1,11 @@
 package ua.com.agroswit.model;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.hibernate.proxy.HibernateProxy;
-import ua.com.agroswit.model.enums.OrderStateE;
 
-import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 
-import static jakarta.persistence.FetchType.EAGER;
 import static jakarta.persistence.GenerationType.IDENTITY;
 
 @Getter
@@ -21,28 +13,15 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 @ToString
 @RequiredArgsConstructor
 @Entity
-@Table(name = "orders")
-public class Order {
+public class Customer {
 
     @Id
     @GeneratedValue(strategy = IDENTITY)
     private Integer id;
 
-    @Enumerated(EnumType.STRING)
-    @CollectionTable(name = "order_state",
-            joinColumns = @JoinColumn(name = "state_id", nullable = false)
-    )
-    private OrderStateE state;
-
-    @Column(nullable = false)
-    private LocalDateTime createdAt;
-
-    @ManyToOne
-    @JoinColumn(name = "customer_id", nullable = false)
-    private Customer customer;
-
-    @OneToMany(mappedBy = "orderId", fetch = EAGER)
-    private Set<OrderItem> items = new HashSet<>();
+    @OneToOne
+    @JoinColumn(name = "user_id", unique = true, nullable = false)
+    private User user;
 
     @Override
     public final boolean equals(Object o) {
@@ -51,8 +30,8 @@ public class Order {
         Class<?> oEffectiveClass = o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass() : o.getClass();
         Class<?> thisEffectiveClass = this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass() : this.getClass();
         if (thisEffectiveClass != oEffectiveClass) return false;
-        Order order = (Order) o;
-        return getId() != null && Objects.equals(getId(), order.getId());
+        Customer customer = (Customer) o;
+        return getId() != null && Objects.equals(getId(), customer.getId());
     }
 
     @Override

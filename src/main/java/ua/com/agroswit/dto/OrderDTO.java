@@ -7,7 +7,7 @@ import java.util.Set;
 
 public record OrderDTO(
         Integer id,
-        Integer userId,
+        Integer customerId,
         OrderStateE state,
         Set<OrderItemDTO> items,
         LocalDateTime createdAt) {

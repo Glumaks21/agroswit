@@ -6,13 +6,17 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ua.com.agroswit.dto.Groups;
 import ua.com.agroswit.dto.Views;
 import ua.com.agroswit.dto.CategoryDTO;
 import ua.com.agroswit.service.CategoryService;
 
 import java.util.Collection;
 
+import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Tag(name = "Category", description = "Category management API")
@@ -38,15 +42,20 @@ public class CategoryController {
 
     @Operation(summary = "Create new category")
     @PostMapping(consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-    CategoryDTO createCategory(@Valid @JsonView(Views.Create.class) @RequestBody CategoryDTO dto) {
+    CategoryDTO createCategory(@Validated(Groups.Create.class)
+                               @JsonView(Views.Create.class)
+                               @RequestBody CategoryDTO dto) {
         log.info("Received category creating request with dto: {}", dto);
         return service.create(dto);
     }
 
     @Operation(summary = "Create new category with parent ID specified in URL")
+    @ResponseStatus(CREATED)
     @PostMapping(path = "/{categoryId}", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     CategoryDTO createSubcategory(@PathVariable Integer categoryId,
-                                  @Valid  @JsonView(Views.Create.class) @RequestBody CategoryDTO dto) {
+                                  @Valid
+                                  @JsonView(Views.Create.class)
+                                  @RequestBody CategoryDTO dto) {
         var dtoWithParentCategoryId = CategoryDTO.builder()
                 .name(dto.name())
                 .description(dto.description())
