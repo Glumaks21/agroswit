@@ -1,14 +1,17 @@
 package ua.com.agroswit.service.iml;
 
+import jakarta.servlet.ServletContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import ua.com.agroswit.dto.ProducerDTO;
 import ua.com.agroswit.dto.mappers.ProducerMapper;
 import ua.com.agroswit.exception.ResourceNotFoundException;
 import ua.com.agroswit.model.Producer;
 import ua.com.agroswit.repository.ProducerRepository;
+import ua.com.agroswit.service.FileStorageService;
 import ua.com.agroswit.service.ProducerService;
 
 import java.util.List;
@@ -20,6 +23,7 @@ import java.util.Optional;
 public class ProducerServiceImpl implements ProducerService {
 
     private final ProducerRepository repository;
+    private final FileStorageService storageService;
     private final ProducerMapper mapper;
 
     @Override
@@ -50,7 +54,11 @@ public class ProducerServiceImpl implements ProducerService {
     @Override
     public ProducerDTO create(ProducerDTO dto, MultipartFile logo) {
         var producer = mapper.toEntity(dto);
-        producer.setLogoUrl(logo.getOriginalFilename());
+
+        var fileName = storageService.store(logo);
+        //TODO Create better way to generate link to file
+        var fileUrl = "http://localhost:8080/api/v1/uploads/" + fileName;
+        producer.setLogoUrl(fileUrl);
 
         log.info("Saving producer to db: ");
         return mapper.toDTO(repository.save(producer));

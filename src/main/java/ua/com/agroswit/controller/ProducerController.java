@@ -14,8 +14,7 @@ import java.util.Collection;
 import java.util.Optional;
 
 import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
+import static org.springframework.http.MediaType.*;
 
 @Tag(name = "Producer", description = "Producer management API")
 @Slf4j

@@ -11,7 +11,7 @@ import ua.com.agroswit.model.enums.PropertyTypeE;
 
 import java.util.List;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
+//@JsonInclude(JsonInclude.Include.NON_NULL)
 @Builder
 public record CategoryDTO(
 
