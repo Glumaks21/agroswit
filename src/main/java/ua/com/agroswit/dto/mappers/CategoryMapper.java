@@ -4,6 +4,10 @@ import org.mapstruct.*;
 import ua.com.agroswit.dto.CategoryDTO;
 import ua.com.agroswit.model.Category;
 
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import static org.mapstruct.NullValuePropertyMappingStrategy.IGNORE;
 
 @Mapper(componentModel = "spring")

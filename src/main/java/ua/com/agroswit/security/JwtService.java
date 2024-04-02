@@ -3,6 +3,7 @@ package ua.com.agroswit.security;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -15,11 +16,13 @@ import java.util.Date;
 @Service
 public class JwtService {
 
-    @Value("${jwt.secret.key}")
-    private String key;
+    private final String secret;
+    private final Integer expiration;
 
-    @Value("${jwt.secret.expiration}")
-    private Integer expiration;
+    public JwtService(JwtConfigurationProperties properties) {
+        this.secret = properties.getSecret();
+        this.expiration = properties.getExpiration();
+    }
 
     public String generate(User user) {
         var issueDate = new Date();
@@ -27,7 +30,7 @@ public class JwtService {
 
         return Jwts.builder()
                 .signWith(getKey())
-                .subject(user.getLogin())
+                .subject(user.getEmail())
                 .issuedAt(issueDate)
                 .expiration(expireDate)
                 .compact();
@@ -60,7 +63,7 @@ public class JwtService {
     }
 
     private SecretKey getKey() {
-        byte[] bytes = key.getBytes(StandardCharsets.UTF_8);
+        byte[] bytes = secret.getBytes(StandardCharsets.UTF_8);
         return Keys.hmacShaKeyFor(bytes);
     }
 }

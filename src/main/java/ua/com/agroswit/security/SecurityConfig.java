@@ -119,11 +119,11 @@ public class SecurityConfig {
 
     @Bean
     UserDetailsService userDetailsService() {
-        return login -> userRepository.findByLogin(login)
-                .map(u -> new User(u.getLogin(), u.getPassword(), Set.of(
+        return email -> userRepository.findByEmail(email)
+                .map(u -> new User(u.getEmail(), u.getPassword(), Set.of(
                         new SimpleGrantedAuthority("ROLE_" + u.getRole().toString())))
                 )
-                .orElseThrow(() -> new UsernameNotFoundException(login));
+                .orElseThrow(() -> new UsernameNotFoundException(email));
     }
 
     @Bean

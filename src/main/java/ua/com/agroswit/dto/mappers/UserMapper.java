@@ -8,4 +8,5 @@ import ua.com.agroswit.model.User;
 public interface UserMapper {
 
     UserDTO toDTO(User entity);
+    User toEntity(UserDTO dto);
 }

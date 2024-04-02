@@ -1,9 +1,6 @@
 spring:
   datasource:
     driver-class-name: org.h2.Driver
-    url: jdbc:h2:mem:agroswitdev
-    username: devuser
-    password: qwerty
   flyway:
     enabled: false
   jpa:
@@ -14,12 +11,4 @@ spring:
         show_sql: true
     hibernate:
       ddl-auto: validate
-#  jackson:
-#    deserialization:
-#      fail-on-ignored-properties: true
-#      fail-on-unknown-properties: true
 
-jwt:
-  secret:
-    key: 073b794f75cea3b0a3b2a8a9804e52e98a302a54febb365a9603024e1fa5925a
-    expiration: 300000

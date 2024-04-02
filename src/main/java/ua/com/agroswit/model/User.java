@@ -23,8 +23,11 @@ public class User {
     @GeneratedValue(strategy = IDENTITY)
     private Integer id;
 
-    @Column(length = 20, nullable = false, unique = true)
-    private String login;
+    @Column(length = 320, nullable = false, unique = true)
+    private String email;
+
+    @Column(length = 12, nullable = false, unique = true)
+    private String phone;
 
     @Column(length = 200, nullable = false)
     private String password;

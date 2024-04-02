@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ua.com.agroswit.dto.request.SignInRequest;
-import ua.com.agroswit.dto.request.SignUpRequest;
+import ua.com.agroswit.dto.request.LoginRequest;
+import ua.com.agroswit.dto.request.RegistrationRequest;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -33,9 +33,9 @@ public class AuthController {
                     responseCode = "409",
                     description = "When user login already registered")
     })
-    @PostMapping("/signup")
-    JwtResponseDTO signUp(@RequestBody SignUpRequest dto) {
-        return service.signUp(dto);
+    @PostMapping("/register")
+    JwtResponseDTO register(@RequestBody RegistrationRequest dto) {
+        return service.register(dto);
     }
 
     @Operation(summary = "Authenticate already registered user")
@@ -47,8 +47,8 @@ public class AuthController {
                     responseCode = "401",
                     description = "Credentials are incorrect")
     })
-    @PostMapping("/signin")
-    JwtResponseDTO signIn(@RequestBody SignInRequest dto) {
-        return service.signIn(dto);
+    @PostMapping("/login")
+    JwtResponseDTO login(@RequestBody LoginRequest dto) {
+        return service.login(dto);
     }
 }

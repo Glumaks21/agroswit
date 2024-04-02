@@ -1,6 +1,5 @@
 package ua.com.agroswit.dto;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -10,6 +9,7 @@ import lombok.Builder;
 import ua.com.agroswit.model.enums.PropertyTypeE;
 
 import java.util.List;
+import java.util.Set;
 
 //@JsonInclude(JsonInclude.Include.NON_NULL)
 @Builder
@@ -34,7 +34,7 @@ public record CategoryDTO(
         @JsonView({Views.Create.class, Views.Patch.class})
         List<PropertyDTO> properties,
 
-        List<SimplifiedCategoryDTO> subcategories
+        Set<SimplifiedCategoryDTO> subcategories
 ) {
 
     public record PropertyDTO(
@@ -52,4 +52,7 @@ public record CategoryDTO(
             PropertyTypeE type
     ) {
     }
+
+
 }
+

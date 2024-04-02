@@ -49,9 +49,9 @@ VALUES (1, 1, '48-52'),
        (1, 6, 'степ, лісостеп'),
        (1, 8, 'до 8 рас');
 
-INSERT INTO users(login, password, role)
-VALUES ('glumaks21', '$2a$10$8uyWkYjmBFy.Rk9N6iQJDet0JF01EhxubbelUOGLF.KVs9BSnWj5C', 'ADMIN'),
-       ('customer', 'qwerty', 'USER');
+INSERT INTO users(email, phone, password, role)
+VALUES ('glumaks21@gmail.com', '0961285462', '$2a$10$8uyWkYjmBFy.Rk9N6iQJDet0JF01EhxubbelUOGLF.KVs9BSnWj5C', 'ADMIN'),
+       ('customer@gmail.com', '0961285461', 'qwerty', 'USER');
 
 INSERT INTO customer(user_id, type)
 VALUES ( 2, 'PERSON' );

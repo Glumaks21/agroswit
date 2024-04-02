@@ -4,6 +4,8 @@ import ua.com.agroswit.model.enums.RoleE;
 
 public record UserDTO(
         Integer id,
+        String email,
+        String phone,
         RoleE role
 ) {
 }
