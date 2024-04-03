@@ -26,11 +26,7 @@ public class Package {
     private Double price;
 
     @Column(nullable = false)
-    private Integer volume;
-
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private MeasurementUnitE unit;
+    private Integer count;
 
     @ToString.Exclude
     @ManyToOne

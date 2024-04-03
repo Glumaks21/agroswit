@@ -16,6 +16,8 @@ public record ProductDTO(
         String name,
         String description,
         Producer producer,
+        Integer volume,
+        MeasurementUnitE unit,
         Integer article1CId,
         Collection<ProductPropertyDTO> properties,
         Collection<PackageDTO> packages,

@@ -31,17 +31,17 @@ VALUES ('олійність', 'TEXT', 6),
        ('супротив до вовчка', 'TEXT', 6),
        ('збирання', 'TEXT', 6);
 
-INSERT INTO product(name, image_url, producer_id, category_id, article_1c_id)
-VALUES ('Рейна', 'https://agroswit.com.ua/image/cache/catalog/Seeds/01-reyna-500x500.png', 6, 6, 1),
-       ('ДуетКЛ', 'https://agroswit.com.ua/image/cache/catalog/Seeds/04-duet-500x500.png', 6, 6, 2),
-       ('Еленіс', 'https://agroswit.com.ua/image/cache/catalog/Seeds/55-elenis-1-500x500.png', 7, 6, 3),
-       ('Харнес®, КЕ', 'https://agroswit.com.ua/image/cache/catalog/ZZR/02-harnes-500x500.png', 7, 4, 4);
+INSERT INTO product(name, image_url, producer_id, volume, unit, category_id, article_1c_id)
+VALUES ('Рейна', 'https://agroswit.com.ua/image/cache/catalog/Seeds/01-reyna-500x500.png', 6, 100, 'BAG', 6, 1),
+       ('ДуетКЛ', 'https://agroswit.com.ua/image/cache/catalog/Seeds/04-duet-500x500.png', 6, 300, 'BAG', 6, 2),
+       ('Еленіс', 'https://agroswit.com.ua/image/cache/catalog/Seeds/55-elenis-1-500x500.png', 7, 100, 'BAG', 6, 3),
+       ('Харнес®, КЕ', 'https://agroswit.com.ua/image/cache/catalog/ZZR/02-harnes-500x500.png', 7, 150, 'BAG', 4, 4);
 
-INSERT INTO package(price, product_id, volume, unit)
-VALUES (5000, 1, 100, 'BAG'),
-       (6000, 2, 100, 'BAG'),
-       (8000, 3, 100, 'BAG'),
-       (6400, 4, 100, 'BAG');
+INSERT INTO package(price, product_id, count)
+VALUES (5000, 1, 1000),
+       (6000, 2, 2000),
+       (8000, 3, 3000),
+       (6400, 4, 2000);
 
 INSERT INTO product_property_value(product_id, property_id, prop_value)
 VALUES (1, 1, '48-52'),
@@ -51,13 +51,21 @@ VALUES (1, 1, '48-52'),
 
 INSERT INTO users(email, phone, password, role)
 VALUES ('glumaks21@gmail.com', '0961285462', '$2a$10$8uyWkYjmBFy.Rk9N6iQJDet0JF01EhxubbelUOGLF.KVs9BSnWj5C', 'ADMIN'),
+       ('agroswit@test.com', '0961243854', '$2a$10$8uyWkYjmBFy.Rk9N6iQJDet0JF01EhxubbelUOGLF.KVs9BSnWj5C', 'USER'),
        ('customer@gmail.com', '0961285461', 'qwerty', 'USER');
 
-INSERT INTO customer(user_id, type)
-VALUES ( 2, 'PERSON' );
+INSERT INTO user_info(user_id, name, surname, patronymic)
+VALUES (3, 'Михайло', 'Недобіткін', 'Вікторович');
 
-INSERT INTO person_details(customer_id, name, surname, patronymic)
-VALUES ( 1, 'Михайло', 'Недобіткін', 'Вікторович');
+INSERT INTO customer(user_id, type, region, district, settlement)
+VALUES (2, 'COMPANY', 'Кіровоградська область', 'Олександрійський район', 'селище міського типу Приютівка'),
+       (3, 'PERSON', 'Кіровоградська область', 'Олександрійський район', 'місто Олександрія');
+
+INSERT INTO company_info(customer_id, name, egrpou, incorporation_date)
+VALUES (1, 'ТОВ НВФ «АГРОСВІТ»', 23233729, '1997-07-07');
+
+INSERT INTO person_info(customer_id, birth_date, sex)
+VALUES (2, '2003-01-01', 0);
 
 INSERT INTO order_state(name)
 VALUES ('RECEIVED'),

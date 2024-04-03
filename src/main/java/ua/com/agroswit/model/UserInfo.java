@@ -1,46 +1,32 @@
 package ua.com.agroswit.model;
 
-import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import lombok.*;
 import org.hibernate.proxy.HibernateProxy;
 
-import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
-
-import static jakarta.persistence.FetchType.EAGER;
-import static jakarta.persistence.GenerationType.IDENTITY;
 
 @Getter
 @Setter
 @ToString
 @RequiredArgsConstructor
 @Entity
-@Table(name = "orders")
-public class Order {
+public class UserInfo {
 
     @Id
-    @GeneratedValue(strategy = IDENTITY)
     @Column(nullable = false)
-    private Integer id;
+    private Integer userId;
 
-    @OneToOne
-    @JoinColumn(name = "state", nullable = false)
-    private OrderState state;
+    @Column(length = 30, nullable = false)
+    private String name;
 
-    @Column(nullable = false)
-    private LocalDateTime createdAt;
+    @Column(length = 30, nullable = false)
+    private String surname;
 
-    @ManyToOne
-    @JoinColumn(name = "customer_id", nullable = false)
-    private Customer customer;
-
-    @OneToMany(mappedBy = "orderId", fetch = EAGER)
-    private Set<OrderItem> items = new HashSet<>();
+    @Column(length = 30, nullable = false)
+    private String patronymic;
 
     @Override
     public final boolean equals(Object o) {
@@ -49,8 +35,8 @@ public class Order {
         Class<?> oEffectiveClass = o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass() : o.getClass();
         Class<?> thisEffectiveClass = this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass() : this.getClass();
         if (thisEffectiveClass != oEffectiveClass) return false;
-        Order order = (Order) o;
-        return getId() != null && Objects.equals(getId(), order.getId());
+        UserInfo userInfo = (UserInfo) o;
+        return getUserId() != null && Objects.equals(getUserId(), userInfo.getUserId());
     }
 
     @Override

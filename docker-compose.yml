@@ -1,0 +1,21 @@
+version: '3'
+services:
+  web:
+    build: .
+    ports:
+      - "9000:8080"
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/agroswit
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: devpass
+  db:
+    image: mysql:8.3
+    environment:
+      MYSQL_DATABASE: agroswit
+      MYSQL_ROOT_PASSWORD: devpass
+    volumes:
+      - db_data:/var/lib/mysql
+volumes:
+  db_data:

@@ -1,21 +1,17 @@
 package ua.com.agroswit.service.iml;
 
-import jakarta.servlet.ServletContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import ua.com.agroswit.dto.ProducerDTO;
 import ua.com.agroswit.dto.mappers.ProducerMapper;
 import ua.com.agroswit.exception.ResourceNotFoundException;
-import ua.com.agroswit.model.Producer;
 import ua.com.agroswit.repository.ProducerRepository;
 import ua.com.agroswit.service.FileStorageService;
 import ua.com.agroswit.service.ProducerService;
 
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service

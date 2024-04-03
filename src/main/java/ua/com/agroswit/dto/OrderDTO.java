@@ -1,6 +1,5 @@
 package ua.com.agroswit.dto;
 
-import ua.com.agroswit.model.enums.OrderStateE;
 
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -8,7 +7,7 @@ import java.util.Set;
 public record OrderDTO(
         Integer id,
         Integer customerId,
-        OrderStateE state,
+        String state,
         Set<OrderItemDTO> items,
         LocalDateTime createdAt) {
 

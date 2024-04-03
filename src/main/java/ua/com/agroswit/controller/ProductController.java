@@ -1,19 +1,19 @@
 package ua.com.agroswit.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.headers.Header;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ua.com.agroswit.dto.request.ProductCreationDTO;
 import ua.com.agroswit.dto.ProductDTO;
+import ua.com.agroswit.dto.request.ProductCreationDTO;
 import ua.com.agroswit.service.ProductService;
 
 import java.util.List;
@@ -31,15 +31,20 @@ public class ProductController {
     private final ProductService service;
 
     @Operation(summary = "Retrieve all products")
-    @ApiResponse(headers = @Header(name = "X-Total-Count", description = "Count of available pages"))
+//    @ApiResponse(headers = @Header(name = "X-Total-Count", description = "Count of available pages"))
     @GetMapping(produces = APPLICATION_JSON_VALUE)
-    ResponseEntity<List<ProductDTO>> getAll(@RequestParam(required = false, defaultValue = "1") int page,
-                                            @RequestParam(required = false, defaultValue = "10") int size,
+    ResponseEntity<List<ProductDTO>> getAll(@PageableDefault Pageable pageable,
                                             @RequestParam(required = false) Optional<Integer> producerId) {
-        var pageable = PageRequest.of(page - 1, size);
+        if (pageable.getPageNumber() > 0) {
+            pageable = pageable.withPage(pageable.getPageNumber() - 1);
+        }
 
-        var productPage = producerId.map(id -> service.getAllByProducer(id, pageable))
-                .orElseGet(() -> service.getAll(pageable));
+        Page<ProductDTO> productPage;
+        if (producerId.isPresent()) {
+            productPage = service.getAllByProducer(producerId.get(), pageable);
+        } else {
+            productPage = service.getAll(pageable);
+        }
 
         var headers = new HttpHeaders();
         headers.add("X-Total-Count", String.valueOf(productPage.getTotalPages()));

@@ -9,6 +9,7 @@ import ua.com.agroswit.model.Order;
 public interface OrderMapper {
 
     @Mapping(target = "customerId", source = "customer.id")
+    @Mapping(target = "state", source = "state.name")
     OrderDTO toDTO(Order order);
 
 }

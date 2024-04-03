@@ -4,17 +4,16 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ua.com.agroswit.dto.ProducerDTO;
 import ua.com.agroswit.service.ProducerService;
 
 import java.util.Collection;
-import java.util.Optional;
 
 import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.MediaType.*;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
 @Tag(name = "Producer", description = "Producer management API")
 @Slf4j

@@ -3,6 +3,7 @@ package ua.com.agroswit.model;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.proxy.HibernateProxy;
+import ua.com.agroswit.model.enums.MeasurementUnitE;
 
 import java.util.HashSet;
 import java.util.Objects;
@@ -26,6 +27,7 @@ public class Product {
     @GeneratedValue(strategy = IDENTITY)
     private Integer id;
 
+    @Column(length = 200)
     private String imageUrl;
 
     @Column(length = 30, nullable = false, unique = true)
@@ -33,6 +35,10 @@ public class Product {
 
     @Column(length = 500)
     private String description;
+
+    private Integer volume;
+    @Enumerated(EnumType.STRING)
+    private MeasurementUnitE unit;
 
     @Column(name="article_1c_id", unique = true)
     private Integer article1CId;
@@ -48,7 +54,7 @@ public class Product {
     @OneToMany(mappedBy = "product", fetch = EAGER, cascade = ALL)
     private Set<Package> packages = new HashSet<>();
 
-    @OneToMany(mappedBy = "product", fetch = EAGER)
+    @OneToMany(mappedBy = "product", fetch = EAGER, cascade = ALL)
     private Set<ProductPropertyValue> properties = new HashSet<>();
 
     @Override

@@ -1,8 +1,12 @@
 package ua.com.agroswit.model;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.proxy.HibernateProxy;
+import ua.com.agroswit.model.enums.CustomerTypeE;
 
 import java.util.Objects;
 
@@ -17,11 +21,34 @@ public class Customer {
 
     @Id
     @GeneratedValue(strategy = IDENTITY)
+    @Column(nullable = false, unique = true)
     private Integer id;
 
     @OneToOne
     @JoinColumn(name = "user_id", unique = true, nullable = false)
     private User user;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private CustomerTypeE type;
+
+    @Column(length = 100, nullable = false)
+    private String region;
+
+    @Column(length = 100, nullable = false)
+    private String district;
+
+    @Column(length = 100, nullable = false)
+    private String Settlement;
+
+    @OneToOne(mappedBy = "customer", cascade = CascadeType.ALL)
+    @PrimaryKeyJoinColumn
+    private PersonInfo personInfo;
+
+    @OneToOne(mappedBy = "customer", cascade = CascadeType.ALL)
+    @PrimaryKeyJoinColumn
+    private CompanyInfo companyInfo;
+
 
     @Override
     public final boolean equals(Object o) {
