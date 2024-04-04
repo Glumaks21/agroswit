@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: product-service
+  config:
+    import: classpath:product-service.env[.properties]
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  mvc:
+    problemdetails:
+      enabled: true
+  servlet:
+    multipart:
+      file-size-threshold: 2KB
+      max-file-size: 500KB
+      max-request-size: 500KB
