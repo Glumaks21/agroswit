@@ -19,3 +19,5 @@ spring:
       file-size-threshold: 2KB
       max-file-size: 500KB
       max-request-size: 500KB
+server:
+  port: 8081

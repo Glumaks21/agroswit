@@ -1,0 +1,5 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:30306/agroswit
+    username: root
+    password: root

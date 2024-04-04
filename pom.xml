@@ -17,7 +17,8 @@
     <modules>
         <module>product-service</module>
         <module>storage-service</module>
-        <module>monolith</module>
+        <module>inventory-service</module>
+        <module>order-service</module>
     </modules>
 
     <dependencies>
