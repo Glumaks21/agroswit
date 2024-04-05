@@ -12,9 +12,8 @@ public interface InventoryMapper {
 
     InventoryDTO toDTO(Inventory entity);
     Inventory toEntity(InventoryDTO dto);
-
     @BeanMapping(nullValuePropertyMappingStrategy = IGNORE)
-    @Mapping(target = "productId", ignore = true)
+    @Mapping(target = "product1CId", ignore = true)
     void update(InventoryDTO dto, @MappingTarget Inventory entity);
 
 }

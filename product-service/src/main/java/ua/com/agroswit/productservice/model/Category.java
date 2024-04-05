@@ -3,8 +3,8 @@ package ua.com.agroswit.productservice.model;
 import jakarta.persistence.*;
 import org.hibernate.proxy.HibernateProxy;
 
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
+
 import lombok.*;
 
 import static jakarta.persistence.GenerationType.IDENTITY;
@@ -30,12 +30,12 @@ public class Category {
     private Category parentCategory;
 
     @ToString.Exclude
-    @OneToMany(mappedBy = "parentCategory")
-    private Set<Category> subcategories;
+    @OneToMany(mappedBy = "parentCategory", cascade = CascadeType.REMOVE)
+    private Set<Category> subcategories = new HashSet<>();
 
     @ToString.Exclude
-    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
-    private Set<CategoryProperty> properties;
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CategoryProperty> properties = new ArrayList<>();
 
     @Override
     public final boolean equals(Object o) {

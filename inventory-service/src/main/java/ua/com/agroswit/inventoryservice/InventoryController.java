@@ -28,13 +28,13 @@ public class InventoryController {
         return service.getAll();
     }
 
-    @Operation(summary = "Retrieve product by ID")
+    @Operation(summary = "Retrieve product by 1С ID")
     @GetMapping(path = "/{id}", produces = APPLICATION_JSON_VALUE)
     InventoryDTO getById(@PathVariable Integer id) {
         return service.getById(id);
     }
 
-    @Operation(summary = "Retrieve products by many IDs")
+    @Operation(summary = "Retrieve products by many 1C IDs")
     @GetMapping(params = "id", produces = APPLICATION_JSON_VALUE)
     Collection<InventoryDTO> getByIds(@RequestParam(name = "id") Collection<Integer> ids) {
         return service.getAllByIds(ids);
@@ -48,16 +48,17 @@ public class InventoryController {
         return service.save(dto);
     }
 
-    @Operation(summary = "Partial update of saved product by ID")
+    @Operation(summary = "Partial update of saved product by 1С ID")
     @PatchMapping(path = "/{id}", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     InventoryDTO update(@PathVariable Integer id, @RequestBody InventoryDTO dto) {
-        log.info("Received product updating request with id {} and dto {}", id, dto);
+        log.info("Received product updating request with 1c id {} and dto {}", id, dto);
         return service.updateById(dto, id);
     }
 
-    @Operation(summary = "Delete product from inventory")
+    @Operation(summary = "Delete product from inventory by 1C ID")
     @DeleteMapping(path = "/{id}")
     void deleteById(@PathVariable Integer id) {
-        log.info("Received product deleting request with id: {}", id);
+        log.info("Received product deleting request with 1c id: {}", id);
+        service.delete(id);
     }
 }

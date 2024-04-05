@@ -14,12 +14,10 @@ public interface CategoryMapper {
 
     @Mapping(target = "parentCategoryId", source = "parentCategory.id")
     CategoryDTO toDTO(Category category);
-
+    Category toEntity(CategoryDTO dto);
     @BeanMapping(nullValuePropertyMappingStrategy = IGNORE)
     @Mapping(target = "id", source = "id", ignore = true)
     @Mapping(target = "subcategories", source = "subcategories", ignore = true)
-    void updateFromDTO(CategoryDTO dto, @MappingTarget Category entity);
-
-    Category toEntity(CategoryDTO dto);
+    void update(CategoryDTO dto, @MappingTarget Category entity);
 
 }

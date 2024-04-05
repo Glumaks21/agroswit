@@ -31,13 +31,13 @@ public class InventoryServiceImpl implements InventoryService {
         return inventoryRepo.findById(id)
                 .map(mapper::toDTO)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format(
-                        "Inventory product with id %d not found", id))
+                        "Inventory product with 1c id %d not found", id))
                 );
     }
 
     @Override
     public List<InventoryDTO> getAllByIds(Collection<Integer> ids) {
-        return inventoryRepo.findAllByProductIdIn(ids).stream()
+        return inventoryRepo.findAllByProduct1CIdIn(ids).stream()
                 .map(mapper::toDTO)
                 .toList();
     }
@@ -46,20 +46,20 @@ public class InventoryServiceImpl implements InventoryService {
     public InventoryDTO save(InventoryDTO dto) {
         var product = mapper.toEntity(dto);
 
-        if (inventoryRepo.existsById(dto.productId())) {
+        if (inventoryRepo.existsById(dto.product1CId())) {
             throw new ResourceInConflictStateException(String.format(
-                    "Product with id %d already exists", dto.productId())
+                    "Product with 1c id %d already exists", dto.product1CId())
             );
         }
 
         var response = restClient.get()
-                .uri("http://localhost:8081/api/v1/products/{id}", dto.productId())
+                .uri("http://localhost:8081/api/v1/products?1c_id={id}", dto.product1CId())
                 .retrieve()
                 .toBodilessEntity();
         //TODO add server communication exception
         if (response.getStatusCode().isSameCodeAs(NOT_FOUND)) {
             throw new ResourceNotFoundException(String.format(
-                    "Product with id %d not found", dto.productId())
+                    "Product with 1c id %d not found", dto.product1CId())
             );
         }
 
@@ -71,7 +71,7 @@ public class InventoryServiceImpl implements InventoryService {
     public InventoryDTO updateById(InventoryDTO dto, Integer id) {
         var product = inventoryRepo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format(
-                        "Inventory product with id %d not found", id))
+                        "Inventory product with 1c id %d not found", id))
                 );
 
         mapper.update(dto, product);
@@ -82,7 +82,7 @@ public class InventoryServiceImpl implements InventoryService {
 
     @Override
     public void delete(Integer id) {
-        log.info("Deleting product from inventory with id: {}", id);
+        log.info("Deleting product from inventory with 1c id: {}", id);
         inventoryRepo.deleteById(id);
     }
 }

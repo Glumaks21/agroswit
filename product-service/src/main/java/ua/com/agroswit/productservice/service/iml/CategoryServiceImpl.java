@@ -5,14 +5,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ua.com.agroswit.productservice.dto.CategoryDTO;
+import ua.com.agroswit.productservice.dto.CategoryDTO.PropertyDTO;
 import ua.com.agroswit.productservice.dto.mapper.CategoryMapper;
 import ua.com.agroswit.productservice.exceptions.ResourceInConflictStateException;
 import ua.com.agroswit.productservice.exceptions.ResourceNotFoundException;
-import ua.com.agroswit.productservice.model.Category;
 import ua.com.agroswit.productservice.repository.CategoryRepository;
 import ua.com.agroswit.productservice.service.CategoryService;
 
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -31,6 +32,8 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryDTO getById(Integer id) {
+        repository.findById(id).ifPresent(c -> System.out.println(c.getProperties()));
+
         return repository.findById(id)
                 .map(mapper::toDTO)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format(
@@ -49,17 +52,14 @@ public class CategoryServiceImpl implements CategoryService {
             );
         }
 
-        Category parentCategory = null;
-        if (dto.parentCategoryId() != null) {
-            parentCategory = repository.findById(dto.parentCategoryId())
-                    .orElseThrow(() -> new ResourceNotFoundException(String.format(
-                            "Parent category with id %d not found", dto.parentCategoryId()))
-                    );
-        }
+        var parentCategory = repository.findById(dto.parentCategoryId())
+                .orElseThrow(() -> new ResourceNotFoundException(String.format(
+                        "Parent category with id %d not found", dto.parentCategoryId()))
+                );
 
         var category = mapper.toEntity(dto);
         category.setParentCategory(parentCategory);
-        category.getProperties().forEach(p -> p.setCategory(category));
+//        category.getProperties().forEach(p -> p.setCategory(category));
 
         log.info("Saving new category to db: {}", category);
         return mapper.toDTO(repository.save(category));
@@ -68,19 +68,26 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional
     public CategoryDTO updateById(Integer id, CategoryDTO dto) {
+        validateProperties(dto.properties());
+
         var category = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format(
                         "Category with id %d not found", id))
                 );
+        var parentCategory = repository.findById(dto.parentCategoryId())
+                .orElseThrow(() -> new ResourceNotFoundException(String.format(
+                        "Parent category with id %d not found", dto.parentCategoryId()))
+                );
 
-        mapper.updateFromDTO(dto, category);
+        mapper.update(dto, category);
+        category.setParentCategory(parentCategory);
 
         log.info("Updating category in db: {}", category);
         return mapper.toDTO(repository.save(category));
     }
 
-    private void validateProperties(List<CategoryDTO.PropertyDTO> properties) {
-        for (var i = 0; i < properties.size(); i++) {
+    private void validateProperties(List<PropertyDTO> properties) {
+        for (var i = 0; i < properties.size() - 1; i++) {
             var prop = properties.get(i);
 
             for (var j = i + 1; j < properties.size(); j++) {

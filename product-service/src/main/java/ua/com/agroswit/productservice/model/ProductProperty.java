@@ -3,27 +3,32 @@ package ua.com.agroswit.productservice.model;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.proxy.HibernateProxy;
+import ua.com.agroswit.productservice.model.enums.PropertyTypeE;
 
 import java.util.Objects;
 
 import static jakarta.persistence.GenerationType.IDENTITY;
 
-@Entity
 @Getter
 @Setter
 @ToString
-@Table(name = "product_packages")
-public class Package {
+@Entity
+@Table(name = "product_properties")
+public class ProductProperty {
 
     @Id
     @GeneratedValue(strategy = IDENTITY)
     private Integer id;
 
-    @Column(nullable = false)
-    private Double price;
+    @Column(nullable = false, length = 50)
+    private String name;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Integer count;
+    private PropertyTypeE type;
+
+    @Column(nullable = false, length = 255)
+    private String value;
 
     @ManyToOne
     @JoinColumn(name = "product_id", nullable = false)
@@ -37,8 +42,8 @@ public class Package {
         Class<?> oEffectiveClass = o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass() : o.getClass();
         Class<?> thisEffectiveClass = this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass() : this.getClass();
         if (thisEffectiveClass != oEffectiveClass) return false;
-        Package aPackage = (Package) o;
-        return getId() != null && Objects.equals(getId(), aPackage.getId());
+        ProductProperty that = (ProductProperty) o;
+        return getId() != null && Objects.equals(getId(), that.getId());
     }
 
     @Override

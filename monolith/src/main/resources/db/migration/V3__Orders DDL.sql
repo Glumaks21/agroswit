@@ -17,17 +17,16 @@ create table orders
 
 create table order_items
 (
-    order_id   integer not null,
-    product_id integer not null,
-    package_id integer not null,
-    count      integer not null,
-    primary key (order_id),
+    id         integer   not null auto_increment,
+    order_id   integer   not null,
+    product_id integer   not null,
+    price      float(53) not null,
+    quantity   integer   not null,
+    primary key (id),
     constraint order_item_ordr_id_fk
         foreign key (order_id) references orders (id),
     constraint order_item_prod_id_fk
-        foreign key (product_id) references product (id),
-    constraint order_item_pckg_id_fk
-        foreign key (package_id) references package (id)
+        foreign key (product_id) references product (id)
 );
 
 create table order_history

@@ -50,6 +50,13 @@ public class ProducerController {
         return service.create(json, logo);
     }
 
+    @Operation(summary = "Updating producer by ID")
+    @PatchMapping(path = "/{id}", consumes = MULTIPART_FORM_DATA_VALUE, produces = APPLICATION_JSON_VALUE)
+    ProducerDTO update(@PathVariable Integer id, @RequestPart ProducerDTO json, @RequestPart MultipartFile logo) {
+        log.info("Received producer updating request with json {} and logo {}", json, logo.getOriginalFilename());
+        return service.update(id, json, logo);
+    }
+
     @Operation(summary = "Delete producer by ID")
     @DeleteMapping("/{id}")
     void delete(@PathVariable Integer id) {

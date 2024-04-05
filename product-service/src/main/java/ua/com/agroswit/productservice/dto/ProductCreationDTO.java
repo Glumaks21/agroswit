@@ -13,6 +13,8 @@ public record ProductCreationDTO(
         @NotNull
         Integer producerId,
 
+        Integer article1CId,
+
         @Positive
         @NotNull
         Integer categoryId,

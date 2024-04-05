@@ -13,6 +13,7 @@ public interface ProducerService {
     ProducerDTO getByName(String name);
 
     ProducerDTO create(ProducerDTO dto, MultipartFile logo);
+    ProducerDTO update(Integer id, ProducerDTO dto, MultipartFile logo);
 
     void delete(Integer id);
 }

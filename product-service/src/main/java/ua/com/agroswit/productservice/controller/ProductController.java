@@ -30,18 +30,24 @@ public class ProductController {
 
     private final ProductService service;
 
-    @Operation(summary = "Retrieve all products")
+    @Operation(summary = "Retrieve all products",
+            description = "If active param specified return only active products")
 //    @ApiResponse(headers = @Header(name = "X-Total-Count", description = "Count of available pages"))
     @GetMapping(produces = APPLICATION_JSON_VALUE)
-    ResponseEntity<List<ProductDTO>> getAll(@PageableDefault Pageable pageable,
+    ResponseEntity<List<ProductDTO>> getAll(@PageableDefault(page = 1) Pageable pageable,
+                                            @RequestParam(required = false) Optional<?> active,
                                             @RequestParam(required = false) Optional<Integer> producerId) {
-        if (pageable.getPageNumber() > 0) {
+        if (pageable.getPageNumber() >= 0) {
             pageable = pageable.withPage(pageable.getPageNumber() - 1);
         }
 
         Page<ProductDTO> productPage;
-        if (producerId.isPresent()) {
-            productPage = service.getAllByProducer(producerId.get(), pageable);
+        if (active.isPresent() && producerId.isPresent()) {
+            productPage = service.getAllActiveByProducerId(producerId.get(), pageable);
+        } else if (producerId.isPresent()) {
+            productPage = service.getAllByProducerId(producerId.get(), pageable);
+        } else if (active.isPresent()) {
+            productPage = service.getAllActive(pageable);
         } else {
             productPage = service.getAll(pageable);
         }
@@ -54,10 +60,8 @@ public class ProductController {
 
     @Operation(summary = "Retrieve product by id")
     @GetMapping(path = "/{id}", produces = APPLICATION_JSON_VALUE)
-    ResponseEntity<ProductDTO> getById(@PathVariable Integer id) {
-        var product = service.getById(id);
-        return product.map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    ProductDTO getById(@PathVariable Integer id) {
+        return service.getById(id);
     }
 
     @Operation(summary = "Create product")
@@ -69,8 +73,8 @@ public class ProductController {
 
     @Operation(summary = "Remove product by id")
     @DeleteMapping(path = "/{id}", produces = APPLICATION_JSON_VALUE)
-    void delete(@PathVariable Integer id) {
+    void remove(@PathVariable Integer id) {
         log.info("Received product deleting request for id: {}", id);
-        service.delete(id);
+        service.deactivate(id);
     }
 }

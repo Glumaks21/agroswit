@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestClient;
 import ua.com.agroswit.productservice.dto.ProductCreationDTO;
 import ua.com.agroswit.productservice.dto.ProductDTO;
 import ua.com.agroswit.productservice.dto.mapper.ProductMapper;
@@ -16,8 +17,6 @@ import ua.com.agroswit.productservice.repository.ProducerRepository;
 import ua.com.agroswit.productservice.repository.ProductRepository;
 import ua.com.agroswit.productservice.service.ProductService;
 
-import java.util.Optional;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -25,40 +24,48 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProducerRepository producerRepository;
     private final CategoryRepository categoryRepository;
-    private final ProductRepository productRepository;
+    private final ProductRepository productRepo;
     private final ProductMapper mapper;
 
     @Override
     public Page<ProductDTO> getAll(Pageable pageable) {
-        var productPage = productRepository.findAll(pageable);
-
-        return productPage.map(mapper::toDTO);
+        return productRepo.findAll(pageable)
+                .map(mapper::toDTO);
     }
 
     @Override
-    public Page<ProductDTO> getAllByProducer(Integer producerId, Pageable pageable) {
-        var productPage = productRepository.findByProducerId(producerId, pageable);
-        return productPage.map(mapper::toDTO);
+    public Page<ProductDTO> getAllActive(Pageable pageable) {
+        return productRepo.findAllByActiveTrue(pageable)
+                .map(mapper::toDTO);
     }
 
     @Override
-    public Optional<ProductDTO> getById(Integer id) {
-        var product = productRepository.findById(id);
-        return product.map(mapper::toDTO);
+    public Page<ProductDTO> getAllByProducerId(Integer producerId, Pageable pageable) {
+        return productRepo.findAllByProducerId(producerId, pageable)
+                .map(mapper::toDTO);
     }
 
     @Override
-    public Optional<ProductDTO> getByName(String name) {
-        var product = productRepository.findByName(name);
-        return product.map(mapper::toDTO);
+    public Page<ProductDTO> getAllActiveByProducerId(Integer producerId, Pageable pageable) {
+        return productRepo.findAllByActiveTrueAndProducerId(producerId, pageable)
+                .map(mapper::toDTO);
+    }
+
+    @Override
+    public ProductDTO getById(Integer id) {
+        return productRepo.findById(id)
+                .map(mapper::toDTO)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format(
+                        "Product with id %d not found", id))
+                );
     }
 
     @Transactional
     @Override
     public ProductDTO create(ProductCreationDTO dto) {
-        if (productRepository.existsByName(dto.name())) {
+        if (productRepo.existsByArticle1CId(dto.article1CId())) {
             throw new ResourceInConflictStateException(String.format(
-                    "Product with name %s already exists", dto.name())
+                    "Product with 1c id %d already exists", dto.article1CId())
             );
         }
 
@@ -74,10 +81,10 @@ public class ProductServiceImpl implements ProductService {
         var product = mapper.toEntity(dto);
         product.setProducer(producer);
         product.setCategory(category);
-        product.getPackages().forEach(p -> p.setProduct(product));
+//        product.getPackages().forEach(p -> p.setProduct(product));
 
         log.info("Saving product: {}", product);
-        productRepository.save(product);
+        productRepo.save(product);
 
         return mapper.toDTO(product);
     }
@@ -88,8 +95,8 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void delete(Integer id) {
-        log.info("Deleting product with id: ${}", id);
-        productRepository.deleteById(id);
+    public void deactivate(Integer id) {
+        log.info("Deactivating product with id: {}", id);
+        productRepo.deactivateById(id);
     }
 }

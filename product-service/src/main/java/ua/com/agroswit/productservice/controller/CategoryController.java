@@ -34,15 +34,14 @@ public class CategoryController {
     }
 
     @Operation(summary = "Retrieve category by ID")
-    @GetMapping(path = "/{categoryId}", produces = APPLICATION_JSON_VALUE)
-    CategoryDTO getById(@PathVariable Integer categoryId) {
-        return service.getById(categoryId);
+    @GetMapping(path = "/{id}", produces = APPLICATION_JSON_VALUE)
+    CategoryDTO getById(@PathVariable Integer id) {
+        return service.getById(id);
     }
 
     @Operation(summary = "Create new category")
     @PostMapping(consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-    CategoryDTO createCategory(@Validated(Groups.Create.class)
-                               @JsonView(Views.Create.class)
+    CategoryDTO createCategory(@JsonView(Views.Create.class)
                                @RequestBody CategoryDTO dto) {
         log.info("Received category creating request with dto: {}", dto);
         return service.create(dto);
@@ -66,11 +65,11 @@ public class CategoryController {
     }
 
     @Operation(summary = "Partial updating category by ID")
-    @PatchMapping(path = "/{categoryId}", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-    CategoryDTO patch(@PathVariable Integer categoryId,
+    @PatchMapping(path = "/{id}", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    CategoryDTO update(@PathVariable Integer id,
                       @Valid @JsonView(Views.Patch.class) @RequestBody CategoryDTO dto) {
-        log.info("Received updating request for category with id {} and dto {}", categoryId, dto);
-        return service.updateById(categoryId, dto);
+        log.info("Received updating request for category with id {} and dto {}", id, dto);
+        return service.updateById(id, dto);
     }
 
     @Operation(summary = "Delete category by ID")

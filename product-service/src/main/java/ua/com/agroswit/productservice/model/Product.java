@@ -5,9 +5,7 @@ import lombok.*;
 import org.hibernate.proxy.HibernateProxy;
 import ua.com.agroswit.productservice.model.enums.MeasurementUnitE;
 
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 import static jakarta.persistence.CascadeType.ALL;
 import static jakarta.persistence.FetchType.EAGER;
@@ -29,32 +27,37 @@ public class Product {
     @Column(length = 200)
     private String imageUrl;
 
-    @Column(length = 30, nullable = false, unique = true)
+    @Column(length = 30, nullable = false)
     private String name;
 
     @Column(length = 500)
     private String description;
 
     private Integer volume;
+
     @Enumerated(EnumType.STRING)
     private MeasurementUnitE unit;
 
     @Column(name="article_1c_id", unique = true)
     private Integer article1CId;
 
+    @Column(nullable = false)
+    private Boolean active;
+
     @ManyToOne
-    @JoinColumn(name = "producer_id")
+    @JoinColumn(name = "producer_id", nullable = false)
     private Producer producer;
 
     @ManyToOne
-    @JoinColumn(name = "category_id")
+    @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
-    @OneToMany(mappedBy = "product", fetch = EAGER, cascade = ALL)
+    @OneToMany(mappedBy = "product", fetch = EAGER, cascade = ALL, orphanRemoval = true)
     private Set<Package> packages = new HashSet<>();
 
-    @OneToMany(mappedBy = "product", fetch = EAGER, cascade = ALL)
-    private Set<ProductPropertyValue> properties = new HashSet<>();
+    @OneToMany(mappedBy = "product", fetch = EAGER, cascade = ALL, orphanRemoval = true)
+    private Set<ProductProperty> properties = new HashSet<>();
+
 
     @Override
     public final boolean equals(Object o) {

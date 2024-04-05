@@ -13,8 +13,8 @@ import java.util.Objects;
 @Entity
 public class Inventory {
     @Id
-    @Column(nullable = false)
-    private Integer productId;
+    @Column(name = "product_1с_id", nullable = false)
+    private Integer product1CId;
 
     @Column(nullable = false)
     private Integer quantity;
@@ -27,7 +27,7 @@ public class Inventory {
         Class<?> thisEffectiveClass = this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass() : this.getClass();
         if (thisEffectiveClass != oEffectiveClass) return false;
         Inventory that = (Inventory) o;
-        return getProductId() != null && Objects.equals(getProductId(), that.getProductId());
+        return getProduct1CId() != null && Objects.equals(getProduct1CId(), that.getProduct1CId());
     }
 
     @Override

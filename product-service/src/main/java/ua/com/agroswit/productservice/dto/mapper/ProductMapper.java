@@ -6,7 +6,7 @@ import ua.com.agroswit.productservice.dto.ProductCreationDTO;
 import ua.com.agroswit.productservice.dto.ProductDTO;
 import ua.com.agroswit.productservice.model.Product;
 
-@Mapper(componentModel = "spring", uses = ProductPropertyValueMapper.class)
+@Mapper(componentModel = "spring")
 public interface ProductMapper {
 
 

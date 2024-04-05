@@ -1,42 +1,38 @@
 package ua.com.agroswit.productservice.model;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.proxy.HibernateProxy;
-import lombok.*;
-
 import ua.com.agroswit.productservice.model.enums.PropertyTypeE;
 
 import java.util.Objects;
-
-import static jakarta.persistence.GenerationType.IDENTITY;
 
 @Entity
 @Getter
 @Setter
 @ToString
-@RequiredArgsConstructor
-@AllArgsConstructor
-@Builder
-@Table(name = "category_property", uniqueConstraints =
-@UniqueConstraint(name = "cat_prop_name_cat_id_uk", columnNames = {"name", "category_id"})
+@Table(name = "category_properties", uniqueConstraints = @UniqueConstraint(
+        name = "cat_prop_name_cat_id_uk", columnNames = {"name", "category_id"})
 )
 public class CategoryProperty {
 
     @Id
-    @GeneratedValue(strategy = IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 30)
     private String name;
 
     @Enumerated(EnumType.STRING)
-    @Column(length = 10, nullable = false)
+    @Column(nullable = false)
     private PropertyTypeE type;
 
-    @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
+
 
     @Override
     public final boolean equals(Object o) {

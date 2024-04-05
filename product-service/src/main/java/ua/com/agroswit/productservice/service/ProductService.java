@@ -5,20 +5,15 @@ import org.springframework.data.domain.Pageable;
 import ua.com.agroswit.productservice.dto.ProductCreationDTO;
 import ua.com.agroswit.productservice.dto.ProductDTO;
 
-import java.util.Optional;
-
 public interface ProductService {
     Page<ProductDTO> getAll(Pageable pageable);
-
-    Page<ProductDTO> getAllByProducer(Integer producerId, Pageable pageable);
-
-    Optional<ProductDTO> getById(Integer id);
-
-    Optional<ProductDTO> getByName(String name);
+    Page<ProductDTO> getAllActive(Pageable pageable);
+    Page<ProductDTO> getAllByProducerId(Integer producerId, Pageable pageable);
+    Page<ProductDTO> getAllActiveByProducerId(Integer producerId, Pageable pageable);
+    ProductDTO getById(Integer id);
 
     ProductDTO create(ProductCreationDTO dto);
 
     ProductDTO update();
-
-    void delete(Integer id);
+    void deactivate(Integer id);
 }

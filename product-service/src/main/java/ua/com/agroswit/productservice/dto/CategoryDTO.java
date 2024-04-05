@@ -15,6 +15,7 @@ import java.util.Set;
 @Builder
 public record CategoryDTO(
 
+        @JsonView({Views.Patch.class})
         @Positive
         Integer id,
 
@@ -38,10 +39,6 @@ public record CategoryDTO(
 ) {
 
     public record PropertyDTO(
-            @JsonView({Views.Patch.class})
-            @Positive
-            Integer id,
-
             @JsonView({Views.Create.class, Views.Patch.class})
             @NotBlank
             @Size(min = 2, max = 50)

@@ -11,26 +11,26 @@ import ua.com.agroswit.productservice.repository.ProducerRepository;
 import ua.com.agroswit.productservice.service.ProducerService;
 
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class ProducerServiceImpl implements ProducerService {
 
-    private final ProducerRepository repository;
-    //    private final FileStorageService storageService;
+    private final ProducerRepository producerRepo;
     private final ProducerMapper mapper;
 
     @Override
     public List<ProducerDTO> getAll() {
-        return repository.findAll().stream()
+        return producerRepo.findAll().stream()
                 .map(mapper::toDTO)
                 .toList();
     }
 
     @Override
     public ProducerDTO getById(Integer id) {
-        return repository.findById(id)
+        return producerRepo.findById(id)
                 .map(mapper::toDTO)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format(
                         "Producer with ID %d not found", id))
@@ -39,7 +39,7 @@ public class ProducerServiceImpl implements ProducerService {
 
     @Override
     public ProducerDTO getByName(String name) {
-        return repository.findByName(name)
+        return producerRepo.findByName(name)
                 .map(mapper::toDTO)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format(
                         "Producer with name %s not found", name))
@@ -50,19 +50,35 @@ public class ProducerServiceImpl implements ProducerService {
     public ProducerDTO create(ProducerDTO dto, MultipartFile logo) {
         var producer = mapper.toEntity(dto);
 
-//        var fileName = storageService.store(logo);
-        var fileName = logo.getOriginalFilename();
         //TODO Create better way to generate link to file
-        var fileUrl = "http://localhost:8080/api/v1/uploads/" + fileName;
+        var fileName = logo.getOriginalFilename();
+        var fileUrl = fileName + "-" + UUID.randomUUID();
         producer.setLogoUrl(fileUrl);
 
         log.info("Saving producer to db: ");
-        return mapper.toDTO(repository.save(producer));
+        return mapper.toDTO(producerRepo.save(producer));
+    }
+
+    @Override
+    public ProducerDTO update(Integer id, ProducerDTO dto, MultipartFile logo) {
+        var producer = producerRepo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format(
+                        "Producer with id %d not found", id))
+                );
+
+        mapper.update(dto, producer);
+        //TODO add file saving
+        var fileName = logo.getOriginalFilename();
+        var fileUrl = fileName + "-" + UUID.randomUUID();
+
+        producer.setLogoUrl(fileUrl);
+        log.info("Updating producer in db: ");
+        return mapper.toDTO(producerRepo.save(producer));
     }
 
     @Override
     public void delete(Integer id) {
         log.info("Delete producer with id: {}", id);
-        repository.deleteById(id);
+        producerRepo.deleteById(id);
     }
 }
