@@ -13,4 +13,9 @@ spring:
     hibernate:
       ddl-auto: validate
 server:
-  port: 8090
+  port: 0
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:7777/eureka

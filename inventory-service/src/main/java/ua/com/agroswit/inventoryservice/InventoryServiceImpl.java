@@ -17,7 +17,7 @@ public class InventoryServiceImpl implements InventoryService {
 
     private final InventoryRepository inventoryRepo;
     private final InventoryMapper mapper;
-    private final RestClient restClient;
+    private final RestClient.Builder restClientBuilder;
 
     @Override
     public List<InventoryDTO> getAll() {
@@ -52,8 +52,8 @@ public class InventoryServiceImpl implements InventoryService {
             );
         }
 
-        var response = restClient.get()
-                .uri("http://localhost:8081/api/v1/products?1c_id={id}", dto.product1CId())
+        var response = restClientBuilder.build().get()
+                .uri("http://product-service/api/v1/products?1c_id={id}", dto.product1CId())
                 .retrieve()
                 .toBodilessEntity();
         //TODO add server communication exception
