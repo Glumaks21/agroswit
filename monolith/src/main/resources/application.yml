@@ -3,14 +3,16 @@ spring:
     import: optional:file:./env.properties
   application:
     name: agroswit
+  flyway:
+    enabled: false
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
     url: ${DB_URL}
-    username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
+    username: ${DB_USERNAME}
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: create-drop
+    database-platform: org.hibernate.dialect.MySQLDialect
   mvc:
     problemdetails:
       enabled: true
@@ -20,10 +22,10 @@ spring:
       max-file-size: 500KB
       max-request-size: 500KB
   mail:
-    host: ${SPRING_MAIL_HOST}
-    port: ${SPRING_MAIL_PORT}
-    username: ${SPRING_MAIL_USERNAME}
-    password: ${SPRING_MAIL_PASSWORD}
+    host: ${MAIL_HOST}
+    port: ${MAIL_PORT}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
     properties:
       mail:
         smtp:

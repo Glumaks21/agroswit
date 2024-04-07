@@ -1,26 +1,6 @@
 spring:
   application:
     name: api-gateway
-  cloud:
-    gateway:
-      routes:
-        - id: product-service
-          uri: lb://product-service
-          predicates:
-            - Path=/api/v1/categories/**, /api/v1/products/**, /api/v1/producers/**
-
-        - id: inventory
-          uri: lb://inventory-service
-          predicates:
-            - Path=/api/v1/inventory/**
-
-        - id: orders
-          uri: lb://order-service
-          predicates:
-            - Path=/api/v1/orders/**
-
-eureka:
-  client:
-    serviceUrl:
-      defaultZone: http://localhost:7777/eureka
+  config:
+    import: "optional:configserver:http://localhost:8888"
 
