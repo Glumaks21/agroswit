@@ -15,6 +15,7 @@ import ua.com.agroswit.productservice.dto.SearchParams;
 import ua.com.agroswit.productservice.service.ProductService;
 import ua.com.agroswit.productservice.dto.Groups;
 
+import java.util.Collection;
 import java.util.List;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -36,13 +37,9 @@ public class ProductController {
         return productService.getAll(pageable, searchParams);
     }
 
-    @Operation(summary = "Retrieve producer by 1C ID",
-            description = "If 1c_id is single param the response will be of the found product, otherwise array")
+    @Operation(summary = "Retrieve producers by 1C ID")
     @GetMapping(produces = APPLICATION_JSON_VALUE, params = "1c_id")
-    Object getBy1CIds(@PageableDefault Pageable pageable, @RequestParam(name = "1c_id") List<Integer> ids) {
-        if (ids.size() == 1) {
-            return productService.getBy1CId(ids.getFirst());
-        }
+    Page<ProductDTO> getBy1CIds(@PageableDefault Pageable pageable, @RequestParam(name = "1c_id") List<Integer> ids) {
         return productService.getAllBy1CIds(ids, pageable);
     }
 

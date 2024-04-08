@@ -5,11 +5,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestClient;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
+import reactor.util.function.Tuples;
 import ua.com.agroswit.inventoryservice.exception.ResourceInConflictStateException;
 import ua.com.agroswit.inventoryservice.exception.ResourceNotFoundException;
 import ua.com.agroswit.inventoryservice.dto.InventoryDTO;
@@ -23,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @Slf4j
 @Service
@@ -32,125 +35,140 @@ public class InventoryServiceImpl implements InventoryService {
 
     private final InventoryRepository inventoryRepo;
     private final InventoryMapper mapper;
-    private final RestClient.Builder restClientBuilder;
+    private final WebClient.Builder webClientBuilder;
 
     @Override
     @Transactional(readOnly = true)
-    public Page<InventoryDTO> getAll(Pageable pageable) {
-        var inventoryPage = inventoryRepo.findAll(pageable);
+    public Mono<Page<InventoryDTO>> getAll(Pageable pageable) {
+        return inventoryRepo.findAllBy(pageable)
+                .collectList()
+                .zipWith(inventoryRepo.count())
+                .flatMap(t2 -> {
+                    var ids = t2.getT1().stream()
+                            .map(Inventory::getProduct1CId)
+                            .toList();
 
-        var product1CIds = inventoryPage
-                .map(Inventory::getProduct1CId)
-                .toList();
-        var productEntity = restClientBuilder.build().get()
-                .uri("http://product-service/api/v1/products?%{1c_id}", product1CIds)
-                .retrieve();
+                    var productListMono = webClientBuilder.build()
+                            .get()
+                            .uri("http://product-service/api/v1/products?%{1c_id}", ids)
+                            .retrieve()
+                            .bodyToFlux(ProductDTO.class)
+                            .collectList();
 
-        if (inventoryPage.getTotalElements() == 1) {
-            var product = productEntity.body(ProductDTO.class);
-            return inventoryPage.map(mapper::toDTO)
-                    .map(i -> {
-                        i.setProduct(product);
-                        return i;
-                    });
-        }
+                    return Mono.zip(Mono.just(t2.getT1()), productListMono, Mono.just(t2.getT2()));
+                })
+                .map(t3 -> {
+                    List<InventoryDTO> dtos = new ArrayList<>();
+                    var inventories = t3.getT1();
+                    var products = t3.getT2();
 
-        var products = productEntity.body(new ParameterizedTypeReference<List<ProductDTO>>() {
-        });
-        var inventoryProducts = inventoryPage.getContent();
-        var inventoryProductDTOs = new ArrayList<InventoryDTO>(inventoryProducts.size());
-        for (int i = 0; i < inventoryProducts.size(); i++) {
-            var inventoryDTO = mapper.toDTO(inventoryProducts.get(i));
-            inventoryDTO.setProduct(products.get(i));
-            inventoryProductDTOs.add(inventoryDTO);
-        }
+                    for (int i = 0; i < inventories.size(); i++) {
+                        var dto = mapper.toDTO(inventories.get(i));
+                        dto.setProduct(products.get(i));
+                        dtos.add(dto);
+                    }
 
-        return new PageImpl<>(inventoryProductDTOs, inventoryPage.getPageable(), inventoryPage.getTotalElements());
+                    return new PageImpl<>(dtos, pageable, t3.getT3());
+                });
     }
 
     @Override
     @Transactional(readOnly = true)
-    public InventoryDTO getById(Integer id) {
-        var inventoryProduct = inventoryRepo.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format(
-                        "Inventory product with 1c id %d not found", id))
+    public Flux<InventoryDTO> getByIds(Collection<Integer> ids) {
+        return inventoryRepo.findAllById(ids)
+                .map(mapper::toDTO);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Mono<InventoryDTO> getById(Integer id) {
+        var inventoryMono = inventoryRepo.findById(id)
+                .switchIfEmpty(Mono.error(new ResourceNotFoundException(String.format(
+                        "Inventory product with 1c id %d not found", id)))
                 );
 
-        var productEntity = restClientBuilder.build().get()
-                .uri("http://product-service/api/v1/products?1c_id={id}", inventoryProduct.getProduct1CId())
+        var productMono = webClientBuilder.build().get()
+                .uri("http://product-service/api/v1/products?1c_id={id}", id)
                 .retrieve()
-                .toEntity(ProductDTO.class);
+                .bodyToMono(ProductDTO.class)
+                .switchIfEmpty(Mono.error(new ResourceNotFoundException(String.format(
+                                "Product with 1c id %d not found", id)
+                        ))
+                );
+        ;
 
-        var inventoryDTO = mapper.toDTO(inventoryProduct);
-        inventoryDTO.setProduct(productEntity.getBody());
-
-        return inventoryDTO;
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<InventoryDTO> getByIds(Collection<Integer> ids) {
-        return inventoryRepo.findAllById(ids).stream()
-                .map(mapper::toDTO)
-                .toList();
+        return inventoryMono.flatMap(i ->
+                productMono.map(p -> {
+                    var dto = mapper.toDTO(i);
+                    dto.setProduct(p);
+                    return dto;
+                })
+        );
     }
 
     @Override
     @Transactional
-    public InventoryDTO save(InventoryDTO dto) {
-        var product = mapper.toEntity(dto);
+    public Mono<InventoryDTO> save(InventoryDTO dto) {
+        var inventoryProduct = mapper.toEntity(dto);
 
-        if (inventoryRepo.existsById(dto.getProduct1CId())) {
-            throw new ResourceInConflictStateException(String.format(
-                    "Product with 1c id %d already exists", dto.getProduct1CId())
-            );
-        }
+        var validationMono = inventoryRepo.existsById(dto.getProduct1CId())
+                .switchIfEmpty(Mono.error(new ResourceInConflictStateException(String.format(
+                                "Product with 1c id %d already exists", dto.getProduct1CId()))
+                        )
+                );
 
-        var productEntity = restClientBuilder.build().get()
+        var productMono = webClientBuilder.build().get()
                 .uri("http://product-service/api/v1/products?1c_id={id}", dto.getProduct1CId())
                 .retrieve()
-                .toEntity(ProductDTO.class);
-        //TODO add server communication exception
-        if (productEntity.getStatusCode().isSameCodeAs(NOT_FOUND)) {
-            throw new ResourceNotFoundException(String.format(
-                    "Product with 1c id %d not found", dto.getProduct1CId())
-            );
-        }
-
-        log.info("Saving product to db: {}", product);
-        inventoryRepo.save(product);
-
-        var savedDTO = mapper.toDTO(product);
-        savedDTO.setProduct(productEntity.getBody());
-        return savedDTO;
-    }
-
-    @Override
-    @Transactional
-    public InventoryDTO updateById(InventoryDTO dto, Integer id) {
-        var inventoryProduct = inventoryRepo.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format(
-                        "Inventory product with 1c id %d not found", id))
+                .bodyToMono(ProductDTO.class)
+                .switchIfEmpty(Mono.error(new ResourceNotFoundException(String.format(
+                                "Product with 1c id %d not found", dto.getProduct1CId())
+                        ))
                 );
 
-        log.info("Updating product in db: {}", inventoryProduct);
-        mapper.update(dto, inventoryProduct);
-
-        var productEntity = restClientBuilder.build().get()
-                .uri("http://product-service/api/v1/products?1c_id={id}", inventoryProduct.getProduct1CId())
-                .retrieve()
-                .toEntity(ProductDTO.class);
-
-        var inventoryDTO = mapper.toDTO(inventoryProduct);
-        inventoryDTO.setProduct(productEntity.getBody());
-
-        return inventoryDTO;
+        return validationMono.then(productMono)
+                .flatMap(p -> inventoryRepo.save(inventoryProduct)
+                        .map(i -> {
+                            var inventoryDTO = mapper.toDTO(i);
+                            inventoryDTO.setProduct(p);
+                            return inventoryDTO;
+                        })
+                );
     }
 
     @Override
     @Transactional
-    public void delete(Integer id) {
+    public Mono<InventoryDTO> updateById(InventoryDTO dto, Integer id) {
+        var inventoryProductMono = inventoryRepo.findById(id)
+                .switchIfEmpty(Mono.error(new ResourceNotFoundException(String.format(
+                                "Inventory product with 1c id %d not found", id))
+                        )
+                );
+
+        var productMono = webClientBuilder.build().get()
+                .uri("http://product-service/api/v1/products?1c_id={id}", id)
+                .retrieve()
+                .bodyToMono(ProductDTO.class);
+
+        return inventoryProductMono.flatMap(i -> productMono
+                .flatMap(p -> {
+                    mapper.update(dto, i);
+
+                    log.info("Updating product in db: {}", i);
+                    return inventoryRepo.save(i)
+                            .map(saved -> {
+                                var inventoryDTO = mapper.toDTO(i);
+                                inventoryDTO.setProduct(p);
+                                return inventoryDTO;
+                            });
+                })
+        );
+    }
+
+    @Override
+    @Transactional
+    public Mono<Void> delete(Integer id) {
         log.info("Deleting product from inventory with 1c id: {}", id);
-        inventoryRepo.deleteById(id);
+        return inventoryRepo.deleteById(id);
     }
 }

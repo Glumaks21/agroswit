@@ -13,13 +13,18 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.reactive.function.server.ServerResponse;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import ua.com.agroswit.inventoryservice.dto.Groups;
 import ua.com.agroswit.inventoryservice.dto.InventoryDTO;
 import ua.com.agroswit.inventoryservice.dto.Views;
@@ -30,6 +35,7 @@ import java.util.Optional;
 
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.http.MediaType.TEXT_EVENT_STREAM_VALUE;
 
 
 @Tag(name = "Inventory management API")
@@ -52,23 +58,24 @@ public class InventoryController {
     })
     @JsonView(Views.Public.class)
     @GetMapping(produces = APPLICATION_JSON_VALUE)
-    ResponseEntity<List<InventoryDTO>> getAll(@ParameterObject @PageableDefault Pageable pageable,
-                                              @RequestParam(name = "id") Optional<List<Integer>> ids) {
-        if (ids.isPresent()) {
-            return ResponseEntity.ok(service.getByIds(ids.get()));
-        }
+    Mono<ResponseEntity<List<InventoryDTO>>> getAll(@RequestParam(defaultValue = "1") int page,
+                                                    @RequestParam(defaultValue = "10") int size) {
+        var pageable = page >= 1 && size > 0
+                ? PageRequest.of(page - 1, size)
+                : PageRequest.of(0, 10);
+        return service.getAll(pageable)
+                .map(inventoryPage -> {
+                    var headers = new HttpHeaders();
+                    headers.add("X-Total-Count", String.valueOf(inventoryPage.getTotalElements()));
 
-        var page = service.getAll(pageable);
-        var headers = new HttpHeaders();
-        headers.add("X-Total-Count", String.valueOf(page.getTotalElements()));
-
-        return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
+                    return new ResponseEntity<>(inventoryPage.getContent(), headers, HttpStatus.OK);
+                });
     }
 
     @Operation(summary = "Retrieve product by 1С ID")
     @JsonView(Views.Public.class)
     @GetMapping(path = "/{id}", produces = APPLICATION_JSON_VALUE)
-    InventoryDTO getById(@PathVariable Integer id) {
+    Mono<InventoryDTO> getById(@PathVariable Integer id) {
         return service.getById(id);
     }
 
@@ -76,9 +83,9 @@ public class InventoryController {
     @JsonView(Views.Public.class)
     @ResponseStatus(CREATED)
     @PostMapping(consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-    InventoryDTO save(@Validated(Groups.Create.class)
-                      @JsonView(Views.Create.class)
-                      @RequestBody InventoryDTO dto) {
+    Mono<InventoryDTO> save(@Validated(Groups.Create.class)
+                            @JsonView(Views.Create.class)
+                            @RequestBody InventoryDTO dto) {
         log.info("Received product saving request: {}", dto);
         return service.save(dto);
     }
@@ -86,10 +93,10 @@ public class InventoryController {
     @Operation(summary = "Partial update of saved product by 1С ID")
     @JsonView(Views.Public.class)
     @PatchMapping(path = "/{id}", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-    InventoryDTO update(@PathVariable Integer id,
-                        @Validated(Groups.Update.class)
-                        @JsonView(Views.Update.class)
-                        @RequestBody InventoryDTO dto) {
+    Mono<InventoryDTO> update(@PathVariable Integer id,
+                              @Validated(Groups.Update.class)
+                              @JsonView(Views.Update.class)
+                              @RequestBody InventoryDTO dto) {
         log.info("Received product updating request with 1c id {} and dto {}", id, dto);
         return service.updateById(dto, id);
     }
@@ -97,8 +104,8 @@ public class InventoryController {
     @Operation(summary = "Delete product from inventory by 1C ID")
     @JsonView(Views.Public.class)
     @DeleteMapping(path = "/{id}")
-    void deleteById(@PathVariable Integer id) {
+    Mono<Void> deleteById(@PathVariable Integer id) {
         log.info("Received product deleting request with 1c id: {}", id);
-        service.delete(id);
+        return service.delete(id);
     }
 }
