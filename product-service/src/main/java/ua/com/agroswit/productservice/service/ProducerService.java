@@ -7,13 +7,9 @@ import java.util.List;
 
 public interface ProducerService {
     List<ProducerDTO> getAll();
-
     ProducerDTO getById(Integer id);
-
     ProducerDTO getByName(String name);
-
     ProducerDTO create(ProducerDTO dto, MultipartFile logo);
     ProducerDTO update(Integer id, ProducerDTO dto, MultipartFile logo);
-
     void delete(Integer id);
 }

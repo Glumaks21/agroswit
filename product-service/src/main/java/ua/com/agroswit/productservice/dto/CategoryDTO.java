@@ -15,41 +15,37 @@ import java.util.Set;
 @Builder
 public record CategoryDTO(
 
-        @JsonView({Views.Patch.class})
-        @Positive
+        @JsonView({Views.Public.class, Views.Patch.class})
         Integer id,
 
-        @JsonView({Views.Create.class, Views.Patch.class})
-        @NotBlank(groups = {Groups.Create.class})
-        @Size(min = 2, max = 30)
+        @JsonView({Views.Public.class, Views.Create.class, Views.Patch.class})
+        @Size(groups = {Views.Create.class, Views.Patch.class}, min = 2, max = 50, message = "Name length must be between 2 and 50")
+        @NotBlank(message = "Name must not be blank")
         String name,
 
-        @JsonView({Views.Create.class, Views.Patch.class})
-        @Size(min = 2, max = 300)
+        @JsonView({Views.Public.class, Views.Create.class, Views.Patch.class})
+        @Size(groups = {Views.Create.class, Views.Patch.class}, min = 2, max = 300, message = "Description must be between 2 and 300")
+        @NotBlank(groups = {Views.Create.class, Views.Patch.class}, message = "Description must not be blank")
         String description,
 
-        @JsonView({Views.Create.class, Views.Patch.class})
-        @Positive
+        @JsonView({Views.Public.class, Views.Create.class, Views.Patch.class})
         Integer parentCategoryId,
 
-        @JsonView({Views.Create.class, Views.Patch.class})
+        @JsonView({Views.Public.class, Views.Create.class, Views.Patch.class})
         List<PropertyDTO> properties,
 
+        @JsonView(Views.Public.class)
         Set<SimplifiedCategoryDTO> subcategories
 ) {
 
     public record PropertyDTO(
-            @JsonView({Views.Create.class, Views.Patch.class})
-            @NotBlank
-            @Size(min = 2, max = 50)
+            @Size(min = 2, max = 50, message = "Name must be between 2 and 50")
+            @NotBlank(message = "Message must not be blank")
             String name,
 
-            @JsonView({Views.Create.class, Views.Patch.class})
-            @NotNull
+            @NotNull(message = "Type is required")
             PropertyTypeE type
     ) {
     }
-
-
 }
 

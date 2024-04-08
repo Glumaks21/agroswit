@@ -1,14 +1,58 @@
 services:
+  config-server:
+    build:
+      context: ./config-server
+    networks:
+      - cloud-network
+  discovery-server:
+    build:
+      context: ./discovery-server
+    depends_on:
+      - config-server
+    networks:
+      - cloud-network
+  gateway-server:
+    build:
+      context: ./api-gateway
+    depends_on:
+      - config-server
+      - discovery-server
+    ports:
+      - 8080:8080
+    networks:
+      - cloud-network
+  product-service:
+    build:
+      context: ./product-service
+    depends_on:
+      - config-server
+      - discovery-server
+      - db
+    networks:
+      - cloud-network
+  inventory-service:
+    build:
+      context: ./inventory-service
+    depends_on:
+      - config-server
+      - discovery-server
+      - db
+    networks:
+      - cloud-network
   db:
     image: mysql:8.3
     ports:
       - "3306:3306"
     environment:
-      MYSQL_DATABASE: agroswit-dev
+      MYSQL_DATABASE: agroswit
       MYSQL_USER: user
       MYSQL_PASSWORD: pass
       MYSQL_ROOT_PASSWORD: root
     volumes:
       - db_data:/var/lib/mysql
+
 volumes:
   db_data:
+networks:
+  cloud-network:
+    driver: bridge

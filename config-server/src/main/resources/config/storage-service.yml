@@ -1,10 +1,13 @@
 server:
-  port: 0
+  port: 8085
 
 eureka:
   client:
     serviceUrl:
       defaultZone: http://localhost:7777/eureka
+  mvc:
+    problemdetails:
+      enabled: true
 
 storage:
-  upload-dir: ${UPLOAD_DIR}
+  upload-dir: ${UPLOAD_DIR:uploads}

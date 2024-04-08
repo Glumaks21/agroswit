@@ -1,15 +1,22 @@
 package ua.com.agroswit.productservice.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.DependentSchema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ua.com.agroswit.productservice.dto.ProducerDTO;
 import ua.com.agroswit.productservice.service.ProducerService;
 
 import java.util.Collection;
+import java.util.Optional;
 
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -24,9 +31,17 @@ public class ProducerController {
 
     private final ProducerService service;
 
-    @Operation(summary = "Retrieve all producers")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200")
+    })
+    @Operation(summary = "Retrieve all producers",
+            parameters = @Parameter(name = "name", description = "Specify the name of producer"))
     @GetMapping(produces = APPLICATION_JSON_VALUE)
-    Collection<ProducerDTO> getAll() {
+    Object get(@RequestParam Optional<String> name) {
+        if (name.isPresent()) {
+            return service.getByName(name.get());
+        }
+
         return service.getAll();
     }
 
@@ -34,12 +49,6 @@ public class ProducerController {
     @GetMapping(path = "/{id}", produces = APPLICATION_JSON_VALUE)
     ProducerDTO getById(@PathVariable Integer id) {
         return service.getById(id);
-    }
-
-    @Operation(summary = "Retrieve producer by name")
-    @GetMapping(produces = APPLICATION_JSON_VALUE, params = "name")
-    ProducerDTO getByName(@RequestParam String name) {
-        return service.getByName(name);
     }
 
     @Operation(summary = "Create new producer")

@@ -8,6 +8,17 @@ spring:
         locator:
           enabled: true
       routes:
+        - id: eureka-server
+          uri: http://localhost:7777
+          predicates:
+            - Path=/eureka
+          filters:
+            - SetPath=/
+        - id: discovery-server-static
+          uri: http://localhost:7777
+          predicates:
+            - Path=/eureka/**
+
         - id: product-service
           uri: lb://product-service
           predicates:
@@ -22,7 +33,6 @@ spring:
           uri: lb://order-service
           predicates:
             - Path=/api/v1/orders/**
-
 eureka:
   client:
     serviceUrl:

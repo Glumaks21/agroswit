@@ -37,9 +37,17 @@ VALUES ('Рейна', 'https://agroswit.com.ua/image/cache/catalog/Seeds/01-reyn
        ('Еленіс', 'https://agroswit.com.ua/image/cache/catalog/Seeds/55-elenis-1-500x500.png', 7, 100, 'BAG', 6, 3),
        ('Харнес®, КЕ', 'https://agroswit.com.ua/image/cache/catalog/ZZR/02-harnes-500x500.png', 7, 150, 'BAG', 4, 4);
 
+INSERT INTO inventory(product_1с_id, quantity)
+VALUES (1, 123),
+       (2, 323),
+       (3, 15),
+       (4, 54);
+
 INSERT INTO product_packages(product_id, price, count)
 VALUES (1, 5000, 1000),
        (2, 6000, 2000),
+       (2, 6000, 4000),
+       (2, 6000, 6000),
        (3, 8000, 3000),
        (4, 6400, 2000);
 
