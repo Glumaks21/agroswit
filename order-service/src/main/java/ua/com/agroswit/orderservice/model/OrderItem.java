@@ -18,17 +18,17 @@ import java.util.Objects;
 public class OrderItem {
 
     @Id
-    @Column(nullable = false)
-    private Integer orderId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
 
     @Column(nullable = false)
-    private Integer productId;
+    private Integer orderId;
 
     @Column(nullable = false)
     private Integer packageId;
 
     @Column(nullable = false)
-    private Integer count;
+    private Integer quantity;
 
     @Override
     public final boolean equals(Object o) {
@@ -38,7 +38,7 @@ public class OrderItem {
         Class<?> thisEffectiveClass = this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass() : this.getClass();
         if (thisEffectiveClass != oEffectiveClass) return false;
         OrderItem orderItem = (OrderItem) o;
-        return getOrderId() != null && Objects.equals(getOrderId(), orderItem.getOrderId());
+        return getId() != null && Objects.equals(getId(), orderItem.getId());
     }
 
     @Override

@@ -9,4 +9,5 @@ import java.util.Optional;
 @Repository
 public interface ProducerRepository extends JpaRepository<Producer, Integer> {
     Optional<Producer> findByName(String name);
+    Boolean existsByName(String name);
 }

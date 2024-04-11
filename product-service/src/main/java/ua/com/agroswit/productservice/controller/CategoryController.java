@@ -30,7 +30,7 @@ public class CategoryController {
     @Operation(summary = "Retrieve all categories")
     @GetMapping(produces = APPLICATION_JSON_VALUE)
     Collection<CategoryDTO> getAllCategories() {
-        return service.getAllCategories();
+        return service.getAllHighLevelCategories();
     }
 
     @Operation(summary = "Retrieve category by ID")
@@ -41,8 +41,10 @@ public class CategoryController {
 
     @Operation(summary = "Create new category")
     @PostMapping(consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-    CategoryDTO createCategory(@JsonView(Views.Create.class)
-                               @RequestBody CategoryDTO dto) {
+    CategoryDTO createCategory(
+            @Validated(Groups.Create.class)
+            @JsonView(Views.Create.class)
+            @RequestBody CategoryDTO dto) {
         log.info("Received category creating request with dto: {}", dto);
         return service.create(dto);
     }
@@ -51,7 +53,7 @@ public class CategoryController {
     @ResponseStatus(CREATED)
     @PostMapping(path = "/{categoryId}", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     CategoryDTO createSubcategory(@PathVariable Integer categoryId,
-                                  @Valid
+                                  @Validated(Groups.Create.class)
                                   @JsonView(Views.Create.class)
                                   @RequestBody CategoryDTO dto) {
         var dtoWithParentCategoryId = CategoryDTO.builder()
@@ -64,10 +66,12 @@ public class CategoryController {
         return service.create(dtoWithParentCategoryId);
     }
 
-    @Operation(summary = "Partial updating category by ID")
-    @PatchMapping(path = "/{id}", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    @Operation(summary = "Full updating category by ID")
+    @PutMapping(path = "/{id}", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     CategoryDTO update(@PathVariable Integer id,
-                      @Valid @JsonView(Views.Patch.class) @RequestBody CategoryDTO dto) {
+                       @Validated(Groups.Update.class)
+                       @JsonView(Views.Update.class)
+                       @RequestBody CategoryDTO dto) {
         log.info("Received updating request for category with id {} and dto {}", id, dto);
         return service.updateById(id, dto);
     }

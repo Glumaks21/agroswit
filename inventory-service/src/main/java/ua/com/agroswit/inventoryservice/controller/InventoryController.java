@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.TEXT_EVENT_STREAM_VALUE;
 
@@ -51,9 +52,7 @@ public class InventoryController {
     @ApiResponses({
             @ApiResponse(
                     responseCode = "200",
-                    headers = @Header(description = "Total count of elements, when id param is not specified",
-                            name = "X-Total-Count"
-                    )
+                    headers = @Header(name = "X-Total-Count", description = "Total count of elements")
             ),
     })
     @JsonView(Views.Public.class)
@@ -63,12 +62,13 @@ public class InventoryController {
         var pageable = page >= 1 && size > 0
                 ? PageRequest.of(page - 1, size)
                 : PageRequest.of(0, 10);
+
         return service.getAll(pageable)
                 .map(inventoryPage -> {
                     var headers = new HttpHeaders();
                     headers.add("X-Total-Count", String.valueOf(inventoryPage.getTotalElements()));
 
-                    return new ResponseEntity<>(inventoryPage.getContent(), headers, HttpStatus.OK);
+                    return new ResponseEntity<>(inventoryPage.getContent(), headers, OK);
                 });
     }
 

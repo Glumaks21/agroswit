@@ -19,8 +19,14 @@ public class XTotalCountAdvice implements ResponseBodyAdvice<Object> {
     }
 
     @Override
-    public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType selectedContentType, Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
-        response.getHeaders().add("X-Total-Count", "TEST");
-        return ((Page<?>) body).getContent();
+    public Object beforeBodyWrite(Object body,
+                                  MethodParameter returnType,
+                                  MediaType selectedContentType,
+                                  Class<? extends HttpMessageConverter<?>> selectedConverterType,
+                                  ServerHttpRequest request,
+                                  ServerHttpResponse response) {
+        var page = Page.class.cast(body);
+        response.getHeaders().add("X-Total-Count", String.valueOf(page.getTotalElements()));
+        return page.getContent();
     }
 }

@@ -39,7 +39,7 @@ public class Order {
     @Column(nullable = false)
     private Integer customerId;
 
-    @OneToMany(mappedBy = "orderId", fetch = EAGER)
+    @OneToMany(mappedBy = "orderId", fetch = EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<OrderItem> items = new HashSet<>();
 
     @Override

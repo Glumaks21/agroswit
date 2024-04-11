@@ -5,7 +5,7 @@ import ua.com.agroswit.productservice.dto.CategoryDTO;
 import java.util.List;
 
 public interface CategoryService {
-    List<CategoryDTO> getAllCategories();
+    List<CategoryDTO> getAllHighLevelCategories();
 
     CategoryDTO getById(Integer id);
 

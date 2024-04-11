@@ -9,32 +9,33 @@ import ua.com.agroswit.productservice.dto.CategoryDTO.PropertyDTO;
 import ua.com.agroswit.productservice.dto.mapper.CategoryMapper;
 import ua.com.agroswit.productservice.exceptions.ResourceInConflictStateException;
 import ua.com.agroswit.productservice.exceptions.ResourceNotFoundException;
+import ua.com.agroswit.productservice.model.Category;
+import ua.com.agroswit.productservice.model.CategoryProperty;
 import ua.com.agroswit.productservice.repository.CategoryRepository;
 import ua.com.agroswit.productservice.service.CategoryService;
 
 import java.util.List;
-import java.util.Set;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
 
-    private final CategoryRepository repository;
+    private final CategoryRepository repo;
     private final CategoryMapper mapper;
 
     @Override
-    public List<CategoryDTO> getAllCategories() {
-        return repository.findAllByParentCategoryId(null).stream()
+    @Transactional(readOnly = true)
+    public List<CategoryDTO> getAllHighLevelCategories() {
+        return repo.findAllByParentCategoryId(null).stream()
                 .map(mapper::toDTO)
                 .toList();
     }
 
     @Override
+    @Transactional(readOnly = true)
     public CategoryDTO getById(Integer id) {
-        repository.findById(id).ifPresent(c -> System.out.println(c.getProperties()));
-
-        return repository.findById(id)
+        return repo.findById(id)
                 .map(mapper::toDTO)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format(
                         "Category with id %d not found", id))
@@ -44,68 +45,72 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional
     public CategoryDTO create(CategoryDTO dto) {
-        validateProperties(dto.properties());
-
-        if (repository.existsByName(dto.name())) {
+        if (repo.existsByName(dto.name())) {
             throw new ResourceInConflictStateException(String.format(
                     "Category with name %s already exists", dto.name())
             );
         }
 
-        var parentCategory = repository.findById(dto.parentCategoryId())
-                .orElseThrow(() -> new ResourceNotFoundException(String.format(
-                        "Parent category with id %d not found", dto.parentCategoryId()))
-                );
+        Category parentCategory = null;
+        if (dto.parentCategoryId() != null) {
+            parentCategory = repo.findById(dto.parentCategoryId())
+                    .orElseThrow(() -> new ResourceNotFoundException(String.format(
+                            "Parent category with id %d not found", dto.parentCategoryId()))
+                    );
+        }
 
         var category = mapper.toEntity(dto);
         category.setParentCategory(parentCategory);
-//        category.getProperties().forEach(p -> p.setCategory(category));
+        category.getProperties().forEach(p -> p.setCategory(category));
 
         log.info("Saving new category to db: {}", category);
-        return mapper.toDTO(repository.save(category));
+        return mapper.toDTO(repo.save(category));
     }
 
     @Override
     @Transactional
     public CategoryDTO updateById(Integer id, CategoryDTO dto) {
-        validateProperties(dto.properties());
+        if (id.equals(dto.parentCategoryId())) {
+            throw new IllegalArgumentException(
+                    "Category cannot be subcategory of itself"
+            );
+        }
 
-        var category = repository.findById(id)
+        var category = repo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format(
                         "Category with id %d not found", id))
                 );
-        var parentCategory = repository.findById(dto.parentCategoryId())
-                .orElseThrow(() -> new ResourceNotFoundException(String.format(
-                        "Parent category with id %d not found", dto.parentCategoryId()))
-                );
+
+        Category parentCategory = null;
+        if (dto.parentCategoryId() != null) {
+            parentCategory = repo.findById(dto.parentCategoryId())
+                    .orElseThrow(() -> new ResourceNotFoundException(String.format(
+                            "Parent category with id %d not found", dto.parentCategoryId()))
+                    );
+        }
 
         mapper.update(dto, category);
         category.setParentCategory(parentCategory);
-
-        log.info("Updating category in db: {}", category);
-        return mapper.toDTO(repository.save(category));
-    }
-
-    private void validateProperties(List<PropertyDTO> properties) {
-        for (var i = 0; i < properties.size() - 1; i++) {
-            var prop = properties.get(i);
-
-            for (var j = i + 1; j < properties.size(); j++) {
-                var propToCompare = properties.get(j);
-
-                if (prop.name().equals(propToCompare.name())) {
-//                    throw new RequestValidationException("properties", String.format(
-//                            "There are identical names in properties: %s", prop.name())
-//                    );
-                    throw new RuntimeException();
+        var categoryProps = category.getProperties();
+        for (var prop : categoryProps) {
+            for (var pdto : dto.properties()) {
+                if (prop.getName().equals(pdto.name())) {
+                    prop.setType(pdto.type());
+                    prop.setCategory(category);
+                } else {
+                    categoryProps.remove(prop);
+                    categoryProps.add(new CategoryProperty(null, pdto.name(), pdto.type(), category));
                 }
             }
         }
+
+        log.info("Updating category in db: {}", category);
+        return mapper.toDTO(repo.save(category));
     }
 
     @Override
     public void deleteById(Integer id) {
         log.info("Deleting category with id {} from db", id);
-        repository.deleteById(id);
+        repo.deleteById(id);
     }
 }

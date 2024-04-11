@@ -1,0 +1,52 @@
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: eureka-server
+          uri: http://discovery-server:7777
+          predicates:
+            - Path=/eureka
+          filters:
+            - SetPath=/
+        - id: discovery-server-static
+          uri: http://discovery-server:7777
+          predicates:
+            - Path=/eureka/**
+
+        - id: product-service
+          uri: lb://product-service
+          predicates:
+            - Path=/api/v1/categories/**, /api/v1/products/**, /api/v1/producers/**
+        - id: product-service-swagger
+          uri: lb://product-service
+          predicates:
+            - Path=/product-service/v3/api-docs
+          filters:
+            - StripPrefix=1
+
+        - id: inventory-service
+          uri: lb://inventory-service
+          predicates:
+            - Path=/api/v1/inventory/**
+        - id: inventory-service-swagger
+          uri: lb://inventory-service
+          predicates:
+            - Path=/inventory-service/v3/api-docs
+          filters:
+            - StripPrefix=1
+
+        - id: order-service
+          uri: lb://order-service
+          predicates:
+            - Path=/api/v1/orders/**
+        - id: order-service-swagger
+          uri: lb://order-service
+          predicates:
+            - Path=/order-service/v3/api-docs
+          filters:
+            - StripPrefix=1
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://discovery-server:7777/eureka

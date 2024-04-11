@@ -5,7 +5,6 @@ import jakarta.validation.constraints.*;
 import java.util.Set;
 
 public record SimplifiedProductDTO(
-        @NotBlank
         @Size(min = 2, max = 30)
         String name,
 

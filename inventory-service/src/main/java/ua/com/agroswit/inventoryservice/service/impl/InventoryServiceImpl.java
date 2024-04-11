@@ -6,14 +6,11 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.util.function.Tuple2;
-import reactor.util.function.Tuples;
 import ua.com.agroswit.inventoryservice.exception.ResourceInConflictStateException;
 import ua.com.agroswit.inventoryservice.exception.ResourceNotFoundException;
 import ua.com.agroswit.inventoryservice.dto.InventoryDTO;
@@ -48,12 +45,13 @@ public class InventoryServiceImpl implements InventoryService {
                             .map(Inventory::getProduct1CId)
                             .toList();
 
+                    log.info("Sending get request to product service");
                     var productListMono = webClientBuilder.build()
                             .get()
                             .uri("http://product-service/api/v1/products?%{1c_id}", ids)
                             .retrieve()
-                            .bodyToFlux(ProductDTO.class)
-                            .collectList();
+                            .bodyToMono(new ParameterizedTypeReference<List<ProductDTO>>() {
+                            });
 
                     return Mono.zip(Mono.just(t2.getT1()), productListMono, Mono.just(t2.getT2()));
                 })
@@ -90,17 +88,17 @@ public class InventoryServiceImpl implements InventoryService {
         var productMono = webClientBuilder.build().get()
                 .uri("http://product-service/api/v1/products?1c_id={id}", id)
                 .retrieve()
-                .bodyToMono(ProductDTO.class)
+                .bodyToFlux(ProductDTO.class)
                 .switchIfEmpty(Mono.error(new ResourceNotFoundException(String.format(
                                 "Product with 1c id %d not found", id)
                         ))
-                );
-        ;
+                )
+                .collectList();
 
         return inventoryMono.flatMap(i ->
                 productMono.map(p -> {
                     var dto = mapper.toDTO(i);
-                    dto.setProduct(p);
+                    dto.setProduct(p.getFirst());
                     return dto;
                 })
         );
@@ -120,19 +118,25 @@ public class InventoryServiceImpl implements InventoryService {
         var productMono = webClientBuilder.build().get()
                 .uri("http://product-service/api/v1/products?1c_id={id}", dto.getProduct1CId())
                 .retrieve()
-                .bodyToMono(ProductDTO.class)
+                .bodyToFlux(ProductDTO.class)
                 .switchIfEmpty(Mono.error(new ResourceNotFoundException(String.format(
-                                "Product with 1c id %d not found", dto.getProduct1CId())
-                        ))
-                );
+                                "Product with 1c id %d not found", dto.getProduct1CId()))
+                        )
+                )
+                .collectList();
 
-        return validationMono.then(productMono)
-                .flatMap(p -> inventoryRepo.save(inventoryProduct)
-                        .map(i -> {
-                            var inventoryDTO = mapper.toDTO(i);
-                            inventoryDTO.setProduct(p);
-                            return inventoryDTO;
-                        })
+        return validationMono
+                .doOnNext(p -> log.info("Fetching product info"))
+                .then(productMono)
+                .doOnNext(p -> log.info("Saving product to inventory db {}", inventoryProduct))
+                .flatMap(p -> inventoryRepo.insert(inventoryProduct.getProduct1CId(), inventoryProduct.getQuantity())
+                        .flatMap(count -> inventoryRepo.findById(inventoryProduct.getProduct1CId())
+                                .map(saved -> {
+                                    var inventoryDTO = mapper.toDTO(saved);
+                                    inventoryDTO.setProduct(p.getFirst());
+                                    return inventoryDTO;
+                                })
+                        )
                 );
     }
 
@@ -148,17 +152,19 @@ public class InventoryServiceImpl implements InventoryService {
         var productMono = webClientBuilder.build().get()
                 .uri("http://product-service/api/v1/products?1c_id={id}", id)
                 .retrieve()
-                .bodyToMono(ProductDTO.class);
+                .bodyToFlux(ProductDTO.class)
+                .collectList();
 
-        return inventoryProductMono.flatMap(i -> productMono
-                .flatMap(p -> {
+        return inventoryProductMono.flatMap(i ->
+                productMono.flatMap(p -> {
                     mapper.update(dto, i);
 
                     log.info("Updating product in db: {}", i);
-                    return inventoryRepo.save(i)
+                    return inventoryRepo.update(i.getProduct1CId(), i.getQuantity())
+                            .flatMap(count -> inventoryRepo.findById(i.getProduct1CId()))
                             .map(saved -> {
                                 var inventoryDTO = mapper.toDTO(i);
-                                inventoryDTO.setProduct(p);
+                                inventoryDTO.setProduct(p.getFirst());
                                 return inventoryDTO;
                             });
                 })

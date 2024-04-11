@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Size;
 public record ProducerDTO(
         Integer id,
 
-        @JsonView({Views.Create.class, Views.Patch.class})
+        @JsonView({Views.Create.class, Views.Update.class})
         @Size(min = 2, max = 200, message = "Name must be between 2 and 300")
         @NotBlank(message = "Name must not be blank")
         String name,

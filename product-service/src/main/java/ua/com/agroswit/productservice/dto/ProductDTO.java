@@ -1,15 +1,10 @@
 package ua.com.agroswit.productservice.dto;
 
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import ua.com.agroswit.productservice.model.enums.MeasurementUnitE;
 import ua.com.agroswit.productservice.model.enums.PropertyTypeE;
 
-import java.util.Collection;
 import java.util.List;
 
 //@JsonInclude(JsonInclude.Include.NON_NULL)
@@ -24,11 +19,11 @@ public record ProductDTO(
         MeasurementUnitE unit,
         Boolean active,
         Integer article1CId,
-        List<ProductPropertyDTO> properties,
+        List<PropertyDTO> properties,
         List<PackageDTO> packages,
         Integer categoryId) {
 
-    public record ProductPropertyDTO(
+    public record PropertyDTO(
             String name,
             PropertyTypeE type,
             String value) {

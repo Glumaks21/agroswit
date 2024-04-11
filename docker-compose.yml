@@ -1,58 +1,84 @@
+version: "3.9"
+
 services:
   config-server:
+    container_name: config-server
     build:
       context: ./config-server
+    healthcheck:
+      test: curl --fail http://localhost:8888/management || exit 1
+      interval: 5s
+      timeout: 2s
+      retries: 5
     networks:
       - cloud-network
+
   discovery-server:
+    container_name: discovery-server
     build:
       context: ./discovery-server
+    healthcheck:
+      test: curl --fail http://localhost:7777/eureka/apps || exit 1
+      interval: 5s
+      timeout: 2s
+      retries: 5
     depends_on:
-      - config-server
+      config-server:
+        condition: service_healthy
     networks:
       - cloud-network
+
   gateway-server:
+    container_name: gateway-server
     build:
       context: ./api-gateway
+    healthcheck:
+      test: curl --fail http://localhost:8080/management || exit 1
+      interval: 5s
+      timeout: 2s
+      retries: 5
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker,dev
     depends_on:
-      - config-server
-      - discovery-server
+      discovery-server:
+        condition: service_healthy
     ports:
-      - 8080:8080
+      - "8080:8080"
     networks:
       - cloud-network
+
   product-service:
+    container_name: product-service
     build:
       context: ./product-service
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://host.docker.internal:3306/agroswit
+      - SPRING_DATASOURCE_USERNAME=user
+      - SPRING_DATASOURCE_PASSWORD=pass
     depends_on:
-      - config-server
-      - discovery-server
-      - db
+      gateway-server:
+        condition: service_healthy
     networks:
       - cloud-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
   inventory-service:
+    container_name: inventory-service
+    environment:
+      - SPRING_R2DBC_URL=r2dbc:mysql://host.docker.internal:3306/agroswit
+      - SPRING_R2DBC_USERNAME=user
+      - SPRING_R2DBC_PASSWORD=pass
     build:
       context: ./inventory-service
     depends_on:
-      - config-server
-      - discovery-server
-      - db
+      gateway-server:
+        condition: service_healthy
     networks:
       - cloud-network
-  db:
-    image: mysql:8.3
-    ports:
-      - "3306:3306"
-    environment:
-      MYSQL_DATABASE: agroswit
-      MYSQL_USER: user
-      MYSQL_PASSWORD: pass
-      MYSQL_ROOT_PASSWORD: root
-    volumes:
-      - db_data:/var/lib/mysql
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
-volumes:
-  db_data:
 networks:
   cloud-network:
     driver: bridge

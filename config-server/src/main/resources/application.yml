@@ -4,3 +4,15 @@ server:
 spring:
   profiles:
     active: native
+  cloud:
+    config:
+      server:
+        native:
+          search-locations: classpath:/config/{application}
+
+management:
+  endpoints:
+    web:
+      base-path: /management
+      exposure:
+        include: "*"

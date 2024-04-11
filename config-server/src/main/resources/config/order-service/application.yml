@@ -12,6 +12,7 @@ spring:
   mvc:
     problemdetails:
       enabled: true
+
 eureka:
   client:
     serviceUrl:

@@ -12,7 +12,7 @@ public class OrderHistory {
     @Column(nullable = false)
     private Integer orderId;
 
-    @Column(nullable = false)
+    @Column(name = "changed_by_id", nullable = false)
     private Integer userId;
 
     @Enumerated(EnumType.STRING)

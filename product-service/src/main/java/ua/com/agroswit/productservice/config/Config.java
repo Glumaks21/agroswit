@@ -10,8 +10,8 @@ public class Config {
 
     @Bean
     @LoadBalanced
-    RestClient restClient() {
-        return RestClient.create();
+    RestClient.Builder restClient() {
+        return RestClient.builder();
     }
 
 }

@@ -1,9 +1,7 @@
 package ua.com.agroswit.productservice.model;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.hibernate.proxy.HibernateProxy;
 import ua.com.agroswit.productservice.model.enums.PropertyTypeE;
 
@@ -12,6 +10,8 @@ import java.util.Objects;
 @Entity
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @ToString
 @Table(name = "category_properties", uniqueConstraints = @UniqueConstraint(
         name = "cat_prop_name_cat_id_uk", columnNames = {"name", "category_id"})
@@ -29,6 +29,7 @@ public class CategoryProperty {
     @Column(nullable = false)
     private PropertyTypeE type;
 
+    @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;

@@ -6,11 +6,15 @@ import org.hibernate.proxy.HibernateProxy;
 import java.util.*;
 
 import lombok.*;
+import ua.com.agroswit.productservice.dto.validation.constraint.NameUnique;
 
 import static jakarta.persistence.GenerationType.IDENTITY;
 
 @Entity
 @Getter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 @Setter
 @ToString
 public class Category {
@@ -25,17 +29,25 @@ public class Category {
     @Column(length = 300)
     private String description;
 
+    @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "parent_category_id")
     private Category parentCategory;
 
     @ToString.Exclude
-    @OneToMany(mappedBy = "parentCategory", cascade = CascadeType.REMOVE)
+    @Builder.Default
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "parentCategory", cascade = CascadeType.REMOVE)
     private Set<Category> subcategories = new HashSet<>();
 
-    @ToString.Exclude
-    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CategoryProperty> properties = new ArrayList<>();
+    @NameUnique
+    @Builder.Default
+    @OneToMany(mappedBy = "category", fetch = FetchType.EAGER,  cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<CategoryProperty> properties = new HashSet<>();
+
+    public void setProperties(Set<CategoryProperty> properties) {
+        this.properties = properties;
+        this.properties.forEach(p -> p.setCategory(this));
+    }
 
     @Override
     public final boolean equals(Object o) {

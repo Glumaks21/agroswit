@@ -10,7 +10,6 @@
 
     <groupId>ua.com.agroswit</groupId>
     <artifactId>inventory-service</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
 
     <properties>
         <mapstruct.version>1.5.5.Final</mapstruct.version>
@@ -52,7 +51,7 @@
 
         <dependency>
             <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <artifactId>springdoc-openapi-starter-webflux-ui</artifactId>
             <version>2.4.0</version>
         </dependency>
         <dependency>

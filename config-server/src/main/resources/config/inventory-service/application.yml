@@ -13,7 +13,20 @@ spring:
     problemdetails:
       enabled: true
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+      base-path: /management
+
 eureka:
   client:
     serviceUrl:
       defaultZone: http://localhost:7777/eureka
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html

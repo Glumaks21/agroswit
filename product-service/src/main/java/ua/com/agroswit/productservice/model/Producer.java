@@ -15,7 +15,8 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 @Getter
 @Setter
 @ToString
-@RequiredArgsConstructor
+@AllArgsConstructor
+@NoArgsConstructor
 public class Producer {
 
     @Id
@@ -23,10 +24,10 @@ public class Producer {
     private Integer id;
 
     @Column(nullable = false, unique = true)
-    private String logoUrl;
+    private String name;
 
     @Column(nullable = false, unique = true)
-    private String name;
+    private String logoUrl;
 
     @Override
     public final boolean equals(Object o) {

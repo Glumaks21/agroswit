@@ -10,6 +10,16 @@ create table category
     constraint category_name_parent_cat_id_uk unique (name, parent_category_id)
 );
 
+# create trigger category_parent_cat_id_trigger
+#     after insert
+#     on category
+#     for each row
+# begin
+#     if NEW.parent_category_id = NEW.id then
+#         signal sqlstate '45000' set message_text = 'parent_category_id cannot references itself';
+#     end if;
+# end;
+
 create table category_properties
 (
     id          integer                 not null auto_increment,
@@ -34,7 +44,7 @@ create table product
 (
     id            integer                                     not null auto_increment,
     image_url     varchar(255),
-    name          varchar(30)                                 not null unique,
+    name          varchar(30)                                 not null,
     description   varchar(500),
     active        bit                                         not null default true,
     volume        integer                                     not null,
@@ -74,3 +84,8 @@ create table product_packages
     constraint product_packages foreign key
         (product_id) references product (id)
 );
+
+alter table product_packages
+    add constraint product_pckgs_price_constr check ( price > 0 );
+alter table product_packages
+    add constraint product_pckgs_count_constr check ( count > 0 );

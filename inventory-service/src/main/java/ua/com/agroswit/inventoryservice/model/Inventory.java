@@ -6,7 +6,10 @@ import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
 
-@Data
+@Getter
+@Setter
+@EqualsAndHashCode(of = "product1CId")
+@ToString
 @Table
 public class Inventory {
     @Id
@@ -14,4 +17,5 @@ public class Inventory {
     private Integer product1CId;
 
     private Integer quantity;
+
 }

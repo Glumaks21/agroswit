@@ -7,7 +7,7 @@ public interface Views {
     interface Create {
     }
 
-    interface Patch {
+    interface Update {
     }
 
 }

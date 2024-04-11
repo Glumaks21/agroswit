@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -32,8 +33,8 @@ public class ProductController {
     @Operation(summary = "Retrieve all products")
 //    @ApiResponse(headers = @Header(name = "X-Total-Count", description = "Count of available pages"))
     @GetMapping(produces = APPLICATION_JSON_VALUE)
-    Page<ProductDTO> getAll(@PageableDefault Pageable pageable,
-                            SearchParams searchParams) {
+    Page<ProductDTO> getAll(@ParameterObject @PageableDefault Pageable pageable,
+                            @ParameterObject SearchParams searchParams) {
         return productService.getAll(pageable, searchParams);
     }
 
