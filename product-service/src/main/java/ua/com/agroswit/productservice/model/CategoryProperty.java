@@ -3,7 +3,6 @@ package ua.com.agroswit.productservice.model;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.proxy.HibernateProxy;
-import ua.com.agroswit.productservice.model.enums.PropertyTypeE;
 
 import java.util.Objects;
 
@@ -24,10 +23,6 @@ public class CategoryProperty {
 
     @Column(nullable = false, length = 30)
     private String name;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private PropertyTypeE type;
 
     @ToString.Exclude
     @ManyToOne

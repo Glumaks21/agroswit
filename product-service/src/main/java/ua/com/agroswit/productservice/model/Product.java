@@ -24,8 +24,8 @@ public class Product {
     @GeneratedValue(strategy = IDENTITY)
     private Integer id;
 
-    @Column(length = 200)
-    private String imageUrl;
+    @Column(length = 45)
+    private String image;
 
     @Column(length = 30, nullable = false)
     private String name;

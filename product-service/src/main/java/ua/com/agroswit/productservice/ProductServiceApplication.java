@@ -1,14 +1,7 @@
 package ua.com.agroswit.productservice;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
-import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
-
-import java.util.List;
 
 @SpringBootApplication
 public class ProductServiceApplication {

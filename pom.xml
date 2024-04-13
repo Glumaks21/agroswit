@@ -18,7 +18,6 @@
         <module>api-gateway</module>
         <module>discovery-server</module>
         <module>product-service</module>
-        <module>storage-service</module>
         <module>inventory-service</module>
         <module>order-service</module>
         <module>config-server</module>

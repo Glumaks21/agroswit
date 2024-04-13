@@ -23,6 +23,9 @@ public class Category {
     @GeneratedValue(strategy = IDENTITY)
     private Integer id;
 
+    @Column(length = 45)
+    private String logo;
+
     @Column(nullable = false, length = 30, unique = true)
     private String name;
 
@@ -37,17 +40,16 @@ public class Category {
     @ToString.Exclude
     @Builder.Default
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "parentCategory", cascade = CascadeType.REMOVE)
-    private Set<Category> subcategories = new HashSet<>();
+    private List<Category> subcategories = new ArrayList<>();
 
-    @NameUnique
+//    @NameUnique
     @Builder.Default
     @OneToMany(mappedBy = "category", fetch = FetchType.EAGER,  cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<CategoryProperty> properties = new HashSet<>();
+    private List<CategoryProperty> properties = new ArrayList<>();
 
-    public void setProperties(Set<CategoryProperty> properties) {
-        this.properties = properties;
-        this.properties.forEach(p -> p.setCategory(this));
-    }
+    @ToString.Exclude
+    @OneToMany(mappedBy = "category")
+    private List<Product> products = new ArrayList<>();
 
     @Override
     public final boolean equals(Object o) {

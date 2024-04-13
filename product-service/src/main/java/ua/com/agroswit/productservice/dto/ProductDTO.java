@@ -3,7 +3,6 @@ package ua.com.agroswit.productservice.dto;
 
 import lombok.Builder;
 import ua.com.agroswit.productservice.model.enums.MeasurementUnitE;
-import ua.com.agroswit.productservice.model.enums.PropertyTypeE;
 
 import java.util.List;
 
@@ -25,7 +24,6 @@ public record ProductDTO(
 
     public record PropertyDTO(
             String name,
-            PropertyTypeE type,
             String value) {
     }
 

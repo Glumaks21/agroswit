@@ -33,7 +33,7 @@ create table producer
 create table product
 (
     id            integer                                     not null auto_increment,
-    image_url     varchar(255),
+    image         varchar(255),
     name          varchar(30)                                 not null unique,
     description   varchar(500),
     active        bit                                         not null default true,

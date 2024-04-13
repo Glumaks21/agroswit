@@ -1,7 +1,10 @@
 package ua.com.agroswit.productservice.dto;
 
 public interface Views {
-    interface Public {
+    interface Short {
+
+    }
+    interface Detailed {
 
     }
     interface Create {

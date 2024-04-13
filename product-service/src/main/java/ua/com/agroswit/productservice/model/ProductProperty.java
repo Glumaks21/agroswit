@@ -3,7 +3,6 @@ package ua.com.agroswit.productservice.model;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.proxy.HibernateProxy;
-import ua.com.agroswit.productservice.model.enums.PropertyTypeE;
 
 import java.util.Objects;
 
@@ -22,10 +21,6 @@ public class ProductProperty {
 
     @Column(nullable = false, length = 50)
     private String name;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private PropertyTypeE type;
 
     @Column(nullable = false, length = 255)
     private String value;

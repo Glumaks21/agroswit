@@ -6,6 +6,7 @@ import ua.com.agroswit.productservice.dto.CategoryDTO;
 import ua.com.agroswit.productservice.dto.ProductDTO;
 import ua.com.agroswit.productservice.dto.validation.constraint.NameUnique;
 
+import java.util.List;
 import java.util.Set;
 
 public class NameUniqueValidator implements ConstraintValidator<NameUnique, Object> {
@@ -17,19 +18,20 @@ public class NameUniqueValidator implements ConstraintValidator<NameUnique, Obje
             var elements = set.toArray();
 
             if (elements[0] instanceof CategoryDTO.PropertyDTO) {
-                return isCategoryPropsValid((CategoryDTO.PropertyDTO[]) elements);
+//                return isCategoryPropsValid((List) elements);
             } else if (elements[0] instanceof ProductDTO.PropertyDTO) {
-                return isProductPropsValid((ProductDTO.PropertyDTO[]) elements);
+//                return isProductPropsValid((ProductDTO.PropertyDTO[]) elements);
             }
+            return false;
         }
 
         return true;
     }
 
-    private boolean isCategoryPropsValid(CategoryDTO.PropertyDTO[] props) {
-        for (int i = 0; i < props.length - 1; i++) {
-            for (int j = i + 1; j < props.length; j++) {
-                if (props[i].name().equals(props[j].name())) {
+    private boolean isCategoryPropsValid(List<CategoryDTO.PropertyDTO> props) {
+        for (int i = 0; i < props.size() - 1; i++) {
+            for (int j = i + 1; j < props.size(); j++) {
+                if (props.get(i).name().equals(props.get(j).name())) {
                     return false;
                 }
             }
@@ -37,10 +39,10 @@ public class NameUniqueValidator implements ConstraintValidator<NameUnique, Obje
         return true;
     }
 
-    private boolean isProductPropsValid(ProductDTO.PropertyDTO[] props) {
-        for (int i = 0; i < props.length - 1; i++) {
-            for (int j = i + 1; j < props.length; j++) {
-                if (props[i].name().equals(props[j].name())) {
+    private boolean isProductPropsValid(List<ProductDTO.PropertyDTO> props) {
+        for (int i = 0; i < props.size() - 1; i++) {
+            for (int j = i + 1; j < props.size(); j++) {
+                if (props.get(i).name().equals(props.get(j).name())) {
                     return false;
                 }
             }

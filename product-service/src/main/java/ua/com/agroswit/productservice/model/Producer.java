@@ -23,11 +23,12 @@ public class Producer {
     @GeneratedValue(strategy = IDENTITY)
     private Integer id;
 
-    @Column(nullable = false, unique = true)
+    @Column(length = 100, nullable = false, unique = true)
     private String name;
 
-    @Column(nullable = false, unique = true)
-    private String logoUrl;
+    @Column(length = 45, nullable = false, unique = true)
+    private String logo;
+
 
     @Override
     public final boolean equals(Object o) {

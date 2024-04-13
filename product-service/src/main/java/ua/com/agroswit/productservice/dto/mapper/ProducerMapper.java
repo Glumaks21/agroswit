@@ -9,8 +9,13 @@ import ua.com.agroswit.productservice.model.Producer;
 @Mapper(componentModel = "spring")
 public interface ProducerMapper {
 
-    ProducerDTO toDTO(Producer entity);
+    @Mapping(target = "id", source = "entity.id")
+    @Mapping(target = "name", source = "entity.name")
+    @Mapping(target = "logoUrl", source = "logoUrl")
+    ProducerDTO toDTO(Producer entity, String logoUrl);
+
     Producer toEntity(ProducerDTO dto);
+
     @Mapping(target = "id", ignore = true)
     void update(ProducerDTO dto, @MappingTarget Producer entity);
 

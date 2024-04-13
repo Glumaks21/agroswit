@@ -1,11 +1,11 @@
-INSERT INTO producer(name, logo_url)
-VALUES ('Agronutrition', 'https://agroswit.com.ua/image/cache/catalog/Parthners/09-agronutrition-100x100.png'),
-       ('FMC Ukraine', 'https://agroswit.com.ua/image/cache/catalog/Parthners/04-fmc-100x100.png'),
-       ('Corteva Agriscience', 'https://agroswit.com.ua/image/cache/catalog/Parthners/03-corteva-100x100.png'),
-       ('MAS Seeds', 'https://agroswit.com.ua/image/cache/catalog/Parthners/23-maïsadour_semences-100x100.png'),
-       ('UPL', 'https://agroswit.com.ua/image/cache/catalog/Parthners/05-upl-100x100.png'),
-       ('May Seeds', 'https://agroswit.com.ua/image/cache/catalog/Parthners/06-may-100x100.png'),
-       ('Bayer', 'https://agroswit.com.ua/image/cache/catalog/Parthners/01-bayer-100x100.png');
+INSERT INTO producer(name, logo)
+VALUES ('Agronutrition', '12c39d73-54d5-424f-8050-b7e2a3a826b1.png'),
+       ('FMC Ukraine', 'b0f493d1-292c-450d-8aaf-efb7f154dac3.png'),
+       ('Corteva Agriscience', '2e677cd1-163c-4a46-afce-ce7d0d9255be.png'),
+       ('MAS Seeds', 'a9cd954c-c650-4bdd-9dfa-5c2de8738da7.png'),
+       ('UPL', 'ff43b16d-d417-4edb-a054-50f409d73f62.png'),
+       ('May Seeds', '366a719b-63b6-4976-b529-a513608d2447.png'),
+       ('Bayer', '2a7a1133-f7f2-4643-bf9c-02636ee6eeb1.png');
 
 INSERT INTO category(name)
 VALUES ('Засоби захисту рослин'),
@@ -20,22 +20,22 @@ VALUES ('Гербіциди', 1),
        ('Рідкі мікродобрива', 3),
        ('Сухі мікродобрива', 3);
 
-INSERT INTO category_properties(category_id, name, type)
-VALUES (3, 'олійність', 'TEXT'),
-       (4, 'висота', 'NUMBER'),
-       (3, 'місце збирання', 'TEXT'),
-       (3, 'група стиглосты', 'TEXT'),
-       (3, 'система гербіцидного захисту', 'TEXT'),
-       (3, 'рекомендована зона культивації', 'TEXT'),
-       (3, 'випадки використання', 'TEXT'),
-       (3, 'супротив до вовчка', 'TEXT'),
-       (3, 'збирання', 'TEXT');
+INSERT INTO category_properties(category_id, name)
+VALUES (3, 'олійність'),
+       (4, 'висота'),
+       (3, 'місце збирання'),
+       (3, 'група стиглосты'),
+       (3, 'система гербіцидного захисту'),
+       (3, 'рекомендована зона культивації'),
+       (3, 'випадки використання'),
+       (3, 'супротив до вовчка'),
+       (3, 'збирання');
 
-INSERT INTO product(name, image_url, producer_id, volume, unit, category_id, article_1c_id)
-VALUES ('Рейна', 'https://agroswit.com.ua/image/cache/catalog/Seeds/01-reyna-500x500.png', 6, 100, 'BAG', 6, 1),
-       ('ДуетКЛ', 'https://agroswit.com.ua/image/cache/catalog/Seeds/04-duet-500x500.png', 6, 300, 'BAG', 6, 2),
-       ('Еленіс', 'https://agroswit.com.ua/image/cache/catalog/Seeds/55-elenis-1-500x500.png', 7, 100, 'BAG', 6, 3),
-       ('Харнес®, КЕ', 'https://agroswit.com.ua/image/cache/catalog/ZZR/02-harnes-500x500.png', 7, 150, 'BAG', 4, 4);
+INSERT INTO product(name, producer_id, volume, unit, category_id, article_1c_id)
+VALUES ('Рейна', 6, 100, 'BAG', 6, 1),
+       ('ДуетКЛ', 6, 300, 'BAG', 6, 2),
+       ('Еленіс', 7, 100, 'BAG', 6, 3),
+       ('Харнес®, КЕ', 7, 150, 'BAG', 4, 4);
 
 INSERT INTO inventory(product_1с_id, quantity)
 VALUES (1, 123),
@@ -51,11 +51,11 @@ VALUES (1, 5000, 1000),
        (3, 8000, 3000),
        (4, 6400, 2000);
 
-INSERT INTO product_properties(product_id, name, type, value)
-VALUES (1, 'олійність', 'TEXT', '48-52'),
-       (1, 'місце збирання', 'TEXT', '50тис.'),
-       (1, 'рекомендована зона культивації', 'TEXT', 'степ, лісостеп'),
-       (1, 'збирання', 'TEXT', 'до 8 рас');
+INSERT INTO product_properties(product_id, name, value)
+VALUES (1, 'олійність', '48-52'),
+       (1, 'місце збирання', '50тис.'),
+       (1, 'рекомендована зона культивації', 'степ, лісостеп'),
+       (1, 'збирання', 'до 8 рас');
 
 INSERT INTO users(email, phone, password, role)
 VALUES ('glumaks21@gmail.com', '0961285462', '$2a$10$8uyWkYjmBFy.Rk9N6iQJDet0JF01EhxubbelUOGLF.KVs9BSnWj5C', 'ADMIN'),
@@ -85,5 +85,5 @@ VALUES ('RECEIVED'),
 INSERT INTO orders(state, customer_id)
 VALUES ('RECEIVED', 1);
 
-INSERT INTO order_items(order_id, product_id, price, quantity)
+INSERT INTO order_items(order_id, package_id, price, quantity)
 VALUES (1, 1, 300, 10);
