@@ -1,4 +1,4 @@
-package ua.com.agroswit.productservice.dto;
+package ua.com.agroswit.productservice.dto.request;
 
 public interface Groups {
     interface Create {}
