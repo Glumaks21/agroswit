@@ -1,29 +1,30 @@
 package ua.com.agroswit.productservice.controller;
 
-import com.fasterxml.jackson.annotation.JsonView;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.Parameters;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import ua.com.agroswit.productservice.dto.CategoryDTO;
-import ua.com.agroswit.productservice.dto.Groups;
-import ua.com.agroswit.productservice.dto.SimplifiedCategoryDTO;
-import ua.com.agroswit.productservice.dto.Views;
+import ua.com.agroswit.productservice.dto.request.CategoryModifiableDTO;
+import ua.com.agroswit.productservice.dto.response.CategoryDTO;
+import ua.com.agroswit.productservice.dto.response.SimpleDetailedProductDTO;
+import ua.com.agroswit.productservice.dto.validation.Groups;
+import ua.com.agroswit.productservice.dto.response.SimplifiedCategoryDTO;
 import ua.com.agroswit.productservice.service.CategoryService;
 
 import java.util.Collection;
 import java.util.Optional;
 
 import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
@@ -37,7 +38,6 @@ public class CategoryController {
     private final CategoryService service;
 
 
-    @JsonView(Views.Detailed.class)
     @Operation(summary = "Retrieve all categories", parameters = {
             @Parameter(name = "lowest", description = "If specified, then response is array of categories that don't have subcategories"),
             @Parameter(name = "name", description = "If specified, then response is object")
@@ -58,36 +58,33 @@ public class CategoryController {
 
     @Operation(summary = "Retrieve category by name", hidden = true)
     @GetMapping(params = "name", produces = APPLICATION_JSON_VALUE)
-    CategoryDTO getBName(@RequestParam String name) {
+    CategoryDTO getByName(@RequestParam String name) {
         return service.getByName(name);
+    }
+
+    @Operation(summary = "Retrieve all products by category ID")
+    @GetMapping(path = "/{id}/products")
+    ResponseEntity<Collection<SimpleDetailedProductDTO>> getAllProducts(
+            @PathVariable Integer id,
+            @ParameterObject @PageableDefault Pageable pageable) {
+        var page = service.getAllProductsById(id, pageable);
+
+        var headers = new HttpHeaders();
+        headers.add("X-Total-Count", String.valueOf(page.getTotalElements()));
+
+        return new ResponseEntity<>(page.getContent(), headers, OK);
     }
 
     @Operation(summary = "Create new category")
     @ResponseStatus(CREATED)
-    @PostMapping(consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    @PostMapping(path = {"", "/{parentCategoryId}"}, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     CategoryDTO createCategory(
+            @PathVariable Optional<Integer> parentCategoryId,
             @Validated(Groups.Create.class)
-            @JsonView(Views.Create.class)
-            @RequestBody CategoryDTO dto) {
+            @RequestBody CategoryModifiableDTO dto) {
+        parentCategoryId.ifPresent(dto::setParentCategoryId);
         log.info("Received category creating request with dto: {}", dto);
         return service.create(dto);
-    }
-
-    @Operation(summary = "Create new category with parent ID specified in URL")
-    @ResponseStatus(CREATED)
-    @PostMapping(path = "/{categoryId}", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-    CategoryDTO createSubcategory(@PathVariable Integer categoryId,
-                                  @Validated(Groups.Create.class)
-                                  @JsonView(Views.Create.class)
-                                  @RequestBody CategoryDTO dto) {
-        var dtoWithParentCategoryId = CategoryDTO.builder()
-                .name(dto.name())
-                .description(dto.description())
-                .parentCategoryId(categoryId)
-                .properties(dto.properties())
-                .build();
-        log.info("Received subcategory creating request with dto: {}", dto);
-        return service.create(dtoWithParentCategoryId);
     }
 
     @Operation(summary = "Save category logo")
@@ -100,15 +97,14 @@ public class CategoryController {
     @Operation(summary = "Full updating category by ID")
     @PutMapping(path = "/{id}", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     CategoryDTO update(@PathVariable Integer id,
-                       @Validated(Groups.Update.class)
-                       @JsonView(Views.Update.class)
-                       @RequestBody CategoryDTO dto) {
+                       @Validated(Groups.FullUpdate.class)
+                       @RequestBody CategoryModifiableDTO dto) {
         log.info("Received updating request for category with id {} and dto {}", id, dto);
-        return service.updateById(id, dto);
+        return service.update(id, dto);
     }
 
     @Operation(summary = "Delete category by ID", parameters = @Parameter(
-            name = "replaceId", description = "Id of category to replace products relation of deleting category")
+            name = "replaceId", description = "Id of category to replace products relation of deleted category")
     )
     @DeleteMapping(path = "/{id}")
     void delete(@PathVariable Integer id, @RequestParam Optional<Integer> replaceId) {

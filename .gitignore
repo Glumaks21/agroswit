@@ -34,3 +34,5 @@ build/
 
 /uploads
 *.env
+/.env.prod
+/.env.dev

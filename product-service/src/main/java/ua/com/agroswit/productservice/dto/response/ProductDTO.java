@@ -1,27 +1,26 @@
 package ua.com.agroswit.productservice.dto.response;
 
-
-import lombok.Builder;
-import ua.com.agroswit.productservice.dto.request.ProducerDTO;
-import ua.com.agroswit.productservice.dto.request.ProductModifiableDTO;
+import ua.com.agroswit.productservice.dto.request.ProductModifiableDTO.PackageDTO;
+import ua.com.agroswit.productservice.dto.request.ProductModifiableDTO.PropertyGroupDTO;
 import ua.com.agroswit.productservice.model.enums.MeasurementUnitE;
+import ua.com.agroswit.productservice.model.enums.ProductType;
 
-import java.util.List;
 import java.util.Set;
 
-//@JsonInclude(JsonInclude.Include.NON_NULL)
-@Builder
-public record FullProductDTO(
+public record ProductDTO(
         Integer id,
         String imageUrl,
         String name,
-        String description,
-        ProducerDTO producer,
+        String shortDescription,
+        String fullDescription,
+        String recommendations,
+        ProductType type,
+        Integer producerId,
         Integer volume,
         MeasurementUnitE unit,
         Boolean active,
-        Integer article1CId,
-        Set<ProductModifiableDTO.PropertyDTO> properties,
-        Set<ProductModifiableDTO.PackageDTO> packages,
-        Integer categoryId) {
+        Set<PropertyGroupDTO> propertyGroups,
+        Set<PackageDTO> packages,
+        Integer categoryId,
+        Set<Integer> filterIds) {
 }

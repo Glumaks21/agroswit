@@ -3,9 +3,9 @@ server:
 
 spring:
   r2dbc:
-    url: r2dbc:mysql://localhost:3306/agroswit
-    username: user
-    password: pass
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: validate
@@ -19,11 +19,6 @@ management:
       exposure:
         include: "*"
       base-path: /management
-
-eureka:
-  client:
-    serviceUrl:
-      defaultZone: http://localhost:7777/eureka
 
 springdoc:
   api-docs:

@@ -1,6 +1,6 @@
-package ua.com.agroswit.productservice.dto.request;
+package ua.com.agroswit.productservice.dto.validation;
 
 public interface Groups {
     interface Create {}
-    interface Update {}
+    interface FullUpdate {}
 }

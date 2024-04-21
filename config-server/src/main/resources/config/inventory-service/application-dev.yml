@@ -1,4 +1,8 @@
 spring:
+  r2dbc:
+    url: r2dbc:mysql://localhost:3306/agroswit
+    username: user
+    password: pass
   jpa:
     show-sql: true
     properties:
@@ -6,3 +10,7 @@ spring:
         format_sql: true
         show_sql: true
 
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:7777/eureka

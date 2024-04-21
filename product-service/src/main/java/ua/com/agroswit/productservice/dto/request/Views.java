@@ -1,16 +1,9 @@
-package ua.com.agroswit.productservice.dto;
+package ua.com.agroswit.productservice.dto.request;
 
 public interface Views {
-    interface Short {
-
-    }
-    interface Detailed {
-
-    }
     interface Create {
     }
 
     interface Update {
     }
-
 }

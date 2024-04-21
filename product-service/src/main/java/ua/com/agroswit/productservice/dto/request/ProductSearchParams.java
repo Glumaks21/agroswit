@@ -1,12 +1,12 @@
-package ua.com.agroswit.productservice.dto;
+package ua.com.agroswit.productservice.dto.request;
 
 
 import io.swagger.v3.oas.annotations.Parameter;
 import org.springdoc.core.annotations.ParameterObject;
 
 @ParameterObject
-public record SearchParams(
-        @Parameter(name = "Active", description = "Filter to retrieve products of specified producer")
+public record ProductSearchParams(
+        @Parameter(name = "producerId", description = "Filter to retrieve products of specified producer")
         Integer producerId,
 
         @Parameter(name = "active", description = "Filter to retrieve active products")

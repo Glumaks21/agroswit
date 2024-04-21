@@ -6,15 +6,14 @@ import org.hibernate.proxy.HibernateProxy;
 import java.util.*;
 
 import lombok.*;
-import ua.com.agroswit.productservice.dto.validation.constraint.NameUnique;
 
+import static jakarta.persistence.CascadeType.ALL;
 import static jakarta.persistence.GenerationType.IDENTITY;
 
 @Entity
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
 @Setter
 @ToString
 public class Category {
@@ -32,24 +31,29 @@ public class Category {
     @Column(length = 300)
     private String description;
 
-    @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "parent_category_id")
     private Category parentCategory;
 
     @ToString.Exclude
-    @Builder.Default
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "parentCategory", cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "parentCategory", cascade = CascadeType.REMOVE)
     private List<Category> subcategories = new ArrayList<>();
 
-//    @NameUnique
-    @Builder.Default
-    @OneToMany(mappedBy = "category", fetch = FetchType.EAGER,  cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CategoryProperty> properties = new ArrayList<>();
+    @ToString.Exclude
+    @OneToMany(mappedBy = "category", cascade = ALL, orphanRemoval = true)
+    private List<CategoryPropertyGroup> propertyGroups = new ArrayList<>();
 
     @ToString.Exclude
     @OneToMany(mappedBy = "category")
     private List<Product> products = new ArrayList<>();
+
+    @ToString.Exclude
+    @ManyToMany
+    @JoinTable(name = "category_filters",
+            joinColumns = @JoinColumn(name = "category_id"),
+            inverseJoinColumns = @JoinColumn(name = "filter_id"))
+    private List<Filter> filters = new ArrayList<>();
+
 
     @Override
     public final boolean equals(Object o) {

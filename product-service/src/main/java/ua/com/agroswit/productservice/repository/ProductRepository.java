@@ -1,6 +1,5 @@
 package ua.com.agroswit.productservice.repository;
 
-import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,18 +11,21 @@ import ua.com.agroswit.productservice.model.Product;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Integer> {
+
     Page<Product> findAllByActiveTrue(Pageable pageable);
     Page<Product> findAllByProducerId(Integer id, Pageable pageable);
     Page<Product> findAllByActiveTrueAndProducerId(Integer id, Pageable pageable);
-    Page<Product> findAllByArticle1CIdIn(Collection<Integer> ids, Pageable pageable);
-    boolean existsByArticle1CId(Integer article1CId);
-    Optional<Product> findByArticle1CId(Integer article1CId);
-    @Transactional
+    Page<Product> findAllByCategoryId(Integer id, Pageable pageable);
+
     @Modifying
-    @Query("UPDATE Product p SET p.active=false WHERE p.id=:id")
-    void deactivateById(@Param("id") Integer id);
+    @Query("UPDATE Product p SET p.active=:state WHERE p.id IN :ids")
+    void updateActiveByIds(Collection<Integer> ids, Boolean state);
+
+    @Modifying
+    @Query("DELETE FROM ProductPropertyGroup WHERE product.id = :id")
+    void deletePropertyGroupsById(Integer id);
+
 }

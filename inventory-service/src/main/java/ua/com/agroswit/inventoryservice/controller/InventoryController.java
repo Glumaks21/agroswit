@@ -2,31 +2,22 @@ package ua.com.agroswit.inventoryservice.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.headers.Header;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ua.com.agroswit.inventoryservice.dto.Groups;
 import ua.com.agroswit.inventoryservice.dto.InventoryDTO;
+import ua.com.agroswit.inventoryservice.dto.InventoryDetailedDTO;
 import ua.com.agroswit.inventoryservice.dto.Views;
 import ua.com.agroswit.inventoryservice.service.InventoryService;
 
@@ -36,7 +27,6 @@ import java.util.Optional;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.http.MediaType.TEXT_EVENT_STREAM_VALUE;
 
 
 @Tag(name = "Inventory management API")
@@ -48,22 +38,28 @@ public class InventoryController {
 
     private final InventoryService service;
 
-    @Operation(summary = "Retrieve products in inventory")
+
+    @Operation(summary = "Retrieve inventory records")
     @ApiResponses({
             @ApiResponse(
                     responseCode = "200",
                     headers = @Header(name = "X-Total-Count", description = "Total count of elements")
             ),
     })
-    @JsonView(Views.Public.class)
     @GetMapping(produces = APPLICATION_JSON_VALUE)
     Mono<ResponseEntity<List<InventoryDTO>>> getAll(@RequestParam(defaultValue = "1") int page,
-                                                    @RequestParam(defaultValue = "10") int size) {
+                                                    @RequestParam(defaultValue = "10") int size,
+                                                    @RequestParam Optional<Boolean> stock) {
         var pageable = page >= 1 && size > 0
                 ? PageRequest.of(page - 1, size)
                 : PageRequest.of(0, 10);
 
-        return service.getAll(pageable)
+        return stock
+                .map(s -> s
+                        ? service.getAllInStock(pageable)
+                        : service.getAllOutOfStock(pageable)
+                )
+                .orElseGet(() -> service.getAll(pageable))
                 .map(inventoryPage -> {
                     var headers = new HttpHeaders();
                     headers.add("X-Total-Count", String.valueOf(inventoryPage.getTotalElements()));
@@ -72,40 +68,41 @@ public class InventoryController {
                 });
     }
 
-    @Operation(summary = "Retrieve product by 1С ID")
-    @JsonView(Views.Public.class)
+    @Operation(summary = "Retrieve inventory record by 1C ID")
     @GetMapping(path = "/{id}", produces = APPLICATION_JSON_VALUE)
     Mono<InventoryDTO> getById(@PathVariable Integer id) {
         return service.getById(id);
     }
 
-    @Operation(summary = "Save new product")
-    @JsonView(Views.Public.class)
+    @GetMapping(params = "p_id", produces = APPLICATION_JSON_VALUE)
+    Flux<InventoryDTO> getByProductIds(@RequestParam(name = "p_id") List<Integer> ids) {
+        return service.getAllByProductIds(ids);
+    }
+
+    @Operation(summary = "Create new inventory record")
     @ResponseStatus(CREATED)
     @PostMapping(consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     Mono<InventoryDTO> save(@Validated(Groups.Create.class)
-                            @JsonView(Views.Create.class)
-                            @RequestBody InventoryDTO dto) {
-        log.info("Received product saving request: {}", dto);
+                                    @JsonView(Views.Create.class)
+                                    @RequestBody InventoryDTO dto) {
+        log.info("Received inventory creating request: {}", dto);
         return service.save(dto);
     }
 
-    @Operation(summary = "Partial update of saved product by 1С ID")
-    @JsonView(Views.Public.class)
-    @PatchMapping(path = "/{id}", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    @Operation(summary = "Update of inventory record")
+    @PutMapping(path = "/{id}", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     Mono<InventoryDTO> update(@PathVariable Integer id,
-                              @Validated(Groups.Update.class)
-                              @JsonView(Views.Update.class)
-                              @RequestBody InventoryDTO dto) {
-        log.info("Received product updating request with 1c id {} and dto {}", id, dto);
+                                      @Validated(Groups.Update.class)
+                                      @JsonView(Views.Update.class)
+                                      @RequestBody InventoryDTO dto) {
+        log.info("Received inventory updating request with 1C id {} and dto {}", id, dto);
         return service.updateById(dto, id);
     }
 
-    @Operation(summary = "Delete product from inventory by 1C ID")
-    @JsonView(Views.Public.class)
+    @Operation(summary = "Delete inventory record by 1C ID")
     @DeleteMapping(path = "/{id}")
     Mono<Void> deleteById(@PathVariable Integer id) {
-        log.info("Received product deleting request with 1c id: {}", id);
-        return service.delete(id);
+        log.info("Received inventory deleting request with 1C id: {}", id);
+        return service.deleteById(id);
     }
 }

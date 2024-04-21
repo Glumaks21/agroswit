@@ -9,20 +9,27 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ua.com.agroswit.inventoryservice.model.Inventory;
 
+import java.util.Collection;
+
 @Repository
 public interface InventoryRepository extends ReactiveCrudRepository<Inventory, Integer> {
 
-    @Modifying
-    @Query("INSERT INTO inventory (product_1с_id, quantity) " +
-            "VALUES (:product1CId, :quantity)")
-    Mono<Integer> insert(Integer product1CId, Integer quantity);
+    Mono<Boolean> existsByProductId(Integer productId);
 
-    @Modifying
-    @Query("UPDATE inventory " +
-            "SET quantity = :quantity " +
-            "WHERE product_1с_id = :product1CId")
-    Mono<Integer> update(Integer product1CId, Integer quantity);
+    @Query("SELECT count(*) FROM inventory WHERE quantity > 0")
+    Mono<Long> countInStock();
+
+    @Query("SELECT count(*) FROM inventory WHERE quantity = 0")
+    Mono<Long> countOutOfStock();
 
     Flux<Inventory> findAllBy(Pageable pageable);
+
+    @Query("SELECT * FROM inventory WHERE quantity > 0")
+    Flux<Inventory> findAllInStock(Pageable pageable);
+
+    @Query("SELECT * FROM inventory WHERE quantity = 0")
+    Flux<Inventory> findAllOutOfStock(Pageable pageable);
+
+    Flux<Inventory> findAllByProductIdIn(Collection<Integer> productIds);
 
 }

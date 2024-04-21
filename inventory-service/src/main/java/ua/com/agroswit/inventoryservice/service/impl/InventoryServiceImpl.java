@@ -2,20 +2,20 @@ package ua.com.agroswit.inventoryservice.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import ua.com.agroswit.inventoryservice.config.ProductClient;
+import ua.com.agroswit.inventoryservice.dto.InventoryDTO;
+import ua.com.agroswit.inventoryservice.dto.InventoryDetailedDTO;
+import ua.com.agroswit.inventoryservice.dto.ProductServiceProductDTO;
+import ua.com.agroswit.inventoryservice.dto.mapper.InventoryMapper;
 import ua.com.agroswit.inventoryservice.exception.ResourceInConflictStateException;
 import ua.com.agroswit.inventoryservice.exception.ResourceNotFoundException;
-import ua.com.agroswit.inventoryservice.dto.InventoryDTO;
-import ua.com.agroswit.inventoryservice.dto.ProductDTO;
-import ua.com.agroswit.inventoryservice.dto.mapper.InventoryMapper;
 import ua.com.agroswit.inventoryservice.model.Inventory;
 import ua.com.agroswit.inventoryservice.repository.InventoryRepository;
 import ua.com.agroswit.inventoryservice.service.InventoryService;
@@ -32,111 +32,146 @@ public class InventoryServiceImpl implements InventoryService {
 
     private final InventoryRepository inventoryRepo;
     private final InventoryMapper mapper;
-    private final WebClient.Builder webClientBuilder;
+    private final ProductClient productClient;
+
 
     @Override
     @Transactional(readOnly = true)
     public Mono<Page<InventoryDTO>> getAll(Pageable pageable) {
-        return inventoryRepo.findAllBy(pageable)
-                .collectList()
-                .zipWith(inventoryRepo.count())
+        var inventoriesMono = inventoryRepo.findAllBy(pageable).collectList();
+        var totalElementsMono = inventoryRepo.count();
+        return Mono.zip(inventoriesMono, totalElementsMono)
+                .map(t2 -> t2.mapT1(mapper::toDTO))
+                .map(t2 -> new PageImpl<>(t2.getT1(), pageable, t2.getT2()));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Mono<Page<InventoryDTO>> getAllInStock(Pageable pageable) {
+        var inventoriesMono = inventoryRepo.findAllInStock(pageable).collectList();
+        var totalElementsMono = inventoryRepo.countInStock();
+        return Mono.zip(inventoriesMono, totalElementsMono)
+                .map(t2 -> t2.mapT1(mapper::toDTO))
+                .map(t2 -> new PageImpl<>(t2.getT1(), pageable, t2.getT2()));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Mono<Page<InventoryDTO>> getAllOutOfStock(Pageable pageable) {
+        var inventoriesMono = inventoryRepo.findAllOutOfStock(pageable).collectList();
+        var totalElementsMono = inventoryRepo.countOutOfStock();
+        return Mono.zip(inventoriesMono, totalElementsMono)
+                .map(t2 -> t2.mapT1(mapper::toDTO))
+                .map(t2 -> new PageImpl<>(t2.getT1(), pageable, t2.getT2()));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Mono<Page<InventoryDetailedDTO>> getAllDetailed(Pageable pageable) {
+        var inventoriesMono = inventoryRepo.findAllBy(pageable).collectList();
+        var totalElementsMono = inventoryRepo.count();
+        return Mono.zip(inventoriesMono, totalElementsMono)
                 .flatMap(t2 -> {
-                    var ids = t2.getT1().stream()
-                            .map(Inventory::getProduct1CId)
-                            .toList();
-
-                    log.info("Sending get request to product service");
-                    var productListMono = webClientBuilder.build()
-                            .get()
-                            .uri("http://product-service/api/v1/products?%{1c_id}", ids)
-                            .retrieve()
-                            .bodyToMono(new ParameterizedTypeReference<List<ProductDTO>>() {
-                            });
-
-                    return Mono.zip(Mono.just(t2.getT1()), productListMono, Mono.just(t2.getT2()));
+                    var ids = t2.getT1().stream().map(Inventory::getId).toList();
+                    var productRespMono = productClient.getAllByIds(ids).collectList();
+                    return Mono.zip(Mono.just(t2.getT1()), productRespMono, Mono.just(t2.getT2()));
                 })
                 .map(t3 -> {
-                    List<InventoryDTO> dtos = new ArrayList<>();
-                    var inventories = t3.getT1();
-                    var products = t3.getT2();
+                    var dtos = collectToDTO(t3.getT1(), t3.getT2());
+                    var totalElements = t3.getT3();
+                    return new PageImpl<>(dtos, pageable, totalElements);
+                });
+    }
 
-                    for (int i = 0; i < inventories.size(); i++) {
-                        var dto = mapper.toDTO(inventories.get(i));
-                        dto.setProduct(products.get(i));
-                        dtos.add(dto);
-                    }
+    private List<InventoryDetailedDTO> collectToDTO(List<Inventory> inventories,
+                                                    List<ProductServiceProductDTO> products) {
+        var dtos = new ArrayList<InventoryDetailedDTO>(inventories.size());
+        for (var i : inventories) {
+            for (var p : products) {
+                if (i.getProductId().equals(p.id())) {
+                    var dto = mapper.toDetailedDTO(i, p);
+                    dtos.add(dto);
+                    break;
+                }
+            }
+        }
+        return dtos;
+    }
 
-                    return new PageImpl<>(dtos, pageable, t3.getT3());
+    @Override
+    @Transactional(readOnly = true)
+    public Mono<Page<InventoryDetailedDTO>> getAllDetailedInStock(Pageable pageable) {
+        var inventoriesMono = inventoryRepo.findAllInStock(pageable).collectList();
+        var totalElementsMono = inventoryRepo.countInStock();
+        return Mono.zip(inventoriesMono, totalElementsMono)
+                .flatMap(t2 -> {
+                    var ids = t2.getT1().stream().map(Inventory::getId).toList();
+                    var productRespMono = productClient.getAllByIds(ids).collectList();
+                    return Mono.zip(Mono.just(t2.getT1()), productRespMono, Mono.just(t2.getT2()));
+                })
+                .map(t3 -> {
+                    var dtos = collectToDTO(t3.getT1(), t3.getT2());
+                    var totalElements = t3.getT3();
+                    return new PageImpl<>(dtos, pageable, totalElements);
                 });
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Flux<InventoryDTO> getByIds(Collection<Integer> ids) {
-        return inventoryRepo.findAllById(ids)
-                .map(mapper::toDTO);
+    public Mono<Page<InventoryDetailedDTO>> getAllDetailedOutOfStock(Pageable pageable) {
+        var inventoriesMono = inventoryRepo.findAllOutOfStock(pageable).collectList();
+        var totalElementsMono = inventoryRepo.countOutOfStock();
+        return Mono.zip(inventoriesMono, totalElementsMono)
+                .flatMap(t2 -> {
+                    var ids = t2.getT1().stream().map(Inventory::getId).toList();
+                    var productRespMono = productClient.getAllByIds(ids).collectList();
+                    return Mono.zip(Mono.just(t2.getT1()), productRespMono, Mono.just(t2.getT2()));
+                })
+                .map(t3 -> {
+                    var dtos = collectToDTO(t3.getT1(), t3.getT2());
+                    var totalElements = t3.getT3();
+                    return new PageImpl<>(dtos, pageable, totalElements);
+                });
     }
 
     @Override
     @Transactional(readOnly = true)
     public Mono<InventoryDTO> getById(Integer id) {
-        var inventoryMono = inventoryRepo.findById(id)
-                .switchIfEmpty(Mono.error(new ResourceNotFoundException(String.format(
-                        "Inventory product with 1c id %d not found", id)))
-                );
+        return inventoryRepo.findById(id)
+                .map(mapper::toDTO);
+    }
 
-        var productMono = webClientBuilder.build().get()
-                .uri("http://product-service/api/v1/products?1c_id={id}", id)
-                .retrieve()
-                .bodyToFlux(ProductDTO.class)
-                .switchIfEmpty(Mono.error(new ResourceNotFoundException(String.format(
-                                "Product with 1c id %d not found", id)
-                        ))
-                )
-                .collectList();
-
-        return inventoryMono.flatMap(i ->
-                productMono.map(p -> {
-                    var dto = mapper.toDTO(i);
-                    dto.setProduct(p.getFirst());
-                    return dto;
-                })
-        );
+    @Override
+    @Transactional(readOnly = true)
+    public Flux<InventoryDTO> getAllByProductIds(Collection<Integer> ids) {
+        return inventoryRepo.findAllByProductIdIn(ids)
+                .map(mapper::toDTO);
     }
 
     @Override
     @Transactional
     public Mono<InventoryDTO> save(InventoryDTO dto) {
         var inventoryProduct = mapper.toEntity(dto);
+        inventoryProduct.setIsNew(true);
 
-        var validationMono = inventoryRepo.existsById(dto.getProduct1CId())
-                .switchIfEmpty(Mono.error(new ResourceInConflictStateException(String.format(
-                                "Product with 1c id %d already exists", dto.getProduct1CId()))
-                        )
+        var articleCheck = inventoryRepo.existsById(dto.getArticle1CId())
+                .flatMap(e -> e
+                        ? Mono.error(new ResourceInConflictStateException(String.format(
+                        "Inventory record with 1c id %d already exists", dto.getArticle1CId())))
+                        : Mono.just(false)
                 );
-
-        var productMono = webClientBuilder.build().get()
-                .uri("http://product-service/api/v1/products?1c_id={id}", dto.getProduct1CId())
-                .retrieve()
-                .bodyToFlux(ProductDTO.class)
-                .switchIfEmpty(Mono.error(new ResourceNotFoundException(String.format(
-                                "Product with 1c id %d not found", dto.getProduct1CId()))
-                        )
-                )
-                .collectList();
+        var productCheck = inventoryRepo.existsByProductId(dto.getProductId())
+                .flatMap(e -> e
+                        ? Mono.error(new ResourceInConflictStateException(String.format(
+                        "Inventory record for product id %d already exists", dto.getProductId())))
+                        : Mono.just(false)
+                );
+        var validationMono = articleCheck.then(productCheck);
 
         return validationMono
-                .doOnNext(p -> log.info("Fetching product info"))
-                .then(productMono)
-                .doOnNext(p -> log.info("Saving product to inventory db {}", inventoryProduct))
-                .flatMap(p -> inventoryRepo.insert(inventoryProduct.getProduct1CId(), inventoryProduct.getQuantity())
-                        .flatMap(count -> inventoryRepo.findById(inventoryProduct.getProduct1CId())
-                                .map(saved -> {
-                                    var inventoryDTO = mapper.toDTO(saved);
-                                    inventoryDTO.setProduct(p.getFirst());
-                                    return inventoryDTO;
-                                })
-                        )
+                .doOnNext(p -> log.info("Saving inventory db {}", inventoryProduct))
+                .flatMap(p -> inventoryRepo.save(inventoryProduct)
+                        .map(mapper::toDTO)
                 );
     }
 
@@ -145,36 +180,23 @@ public class InventoryServiceImpl implements InventoryService {
     public Mono<InventoryDTO> updateById(InventoryDTO dto, Integer id) {
         var inventoryProductMono = inventoryRepo.findById(id)
                 .switchIfEmpty(Mono.error(new ResourceNotFoundException(String.format(
-                                "Inventory product with 1c id %d not found", id))
+                                "Inventory record with 1c id %d not found", id))
                         )
                 );
 
-        var productMono = webClientBuilder.build().get()
-                .uri("http://product-service/api/v1/products?1c_id={id}", id)
-                .retrieve()
-                .bodyToFlux(ProductDTO.class)
-                .collectList();
+        return inventoryProductMono.flatMap(i -> {
+            mapper.update(dto, i);
 
-        return inventoryProductMono.flatMap(i ->
-                productMono.flatMap(p -> {
-                    mapper.update(dto, i);
-
-                    log.info("Updating product in db: {}", i);
-                    return inventoryRepo.update(i.getProduct1CId(), i.getQuantity())
-                            .flatMap(count -> inventoryRepo.findById(i.getProduct1CId()))
-                            .map(saved -> {
-                                var inventoryDTO = mapper.toDTO(i);
-                                inventoryDTO.setProduct(p.getFirst());
-                                return inventoryDTO;
-                            });
-                })
-        );
+            log.info("Updating inventory in db: {}", i);
+            return inventoryRepo.save(i)
+                    .map(mapper::toDTO);
+        });
     }
 
     @Override
     @Transactional
-    public Mono<Void> delete(Integer id) {
-        log.info("Deleting product from inventory with 1c id: {}", id);
+    public Mono<Void> deleteById(Integer id) {
+        log.info("Deleting inventory record with 1c id: {}", id);
         return inventoryRepo.deleteById(id);
     }
 }

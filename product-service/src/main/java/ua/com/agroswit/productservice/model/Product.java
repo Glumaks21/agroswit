@@ -4,20 +4,22 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.proxy.HibernateProxy;
 import ua.com.agroswit.productservice.model.enums.MeasurementUnitE;
+import ua.com.agroswit.productservice.model.enums.ProductType;
 
 import java.util.*;
 
 import static jakarta.persistence.CascadeType.ALL;
-import static jakarta.persistence.FetchType.EAGER;
+import static jakarta.persistence.EnumType.STRING;
 import static jakarta.persistence.GenerationType.IDENTITY;
+import static jakarta.persistence.InheritanceType.JOINED;
 
-@Entity
 @Getter
 @Setter
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@Entity
+@Inheritance(strategy = JOINED)
 public class Product {
 
     @Id
@@ -30,33 +32,48 @@ public class Product {
     @Column(length = 30, nullable = false)
     private String name;
 
-    @Column(length = 500)
-    private String description;
+    @Column(length = 100)
+    private String shortDescription;
+
+    @Column(length = 1000)
+    private String fullDescription;
+
+    @Column(length = 300)
+    private String recommendations;
+
+    @Enumerated(STRING)
+    private ProductType type;
 
     private Integer volume;
 
-    @Enumerated(EnumType.STRING)
+    @Enumerated(STRING)
     private MeasurementUnitE unit;
 
-    @Column(name="article_1c_id", unique = true)
-    private Integer article1CId;
-
     @Column(nullable = false)
-    private Boolean active;
+    private Boolean active = true;
 
     @ManyToOne
-    @JoinColumn(name = "producer_id", nullable = false)
+    @JoinColumn(name = "producer_id")
     private Producer producer;
 
     @ManyToOne
-    @JoinColumn(name = "category_id", nullable = false)
+    @JoinColumn(name = "category_id")
     private Category category;
 
-    @OneToMany(mappedBy = "product", fetch = EAGER, cascade = ALL, orphanRemoval = true)
-    private Set<Package> packages = new HashSet<>();
+    @ToString.Exclude
+    @OneToMany(mappedBy = "product", cascade = ALL, orphanRemoval = true)
+    private List<Package> packages = new ArrayList<>();
 
-    @OneToMany(mappedBy = "product", fetch = EAGER, cascade = ALL, orphanRemoval = true)
-    private Set<ProductProperty> properties = new HashSet<>();
+    @ToString.Exclude
+    @OneToMany(mappedBy = "product", cascade = ALL, orphanRemoval = true)
+    private List<ProductPropertyGroup> propertyGroups = new ArrayList<>();
+
+    @ToString.Exclude
+    @ManyToMany
+    @JoinTable(name = "product_filters",
+            joinColumns = @JoinColumn(name = "product_id"),
+            inverseJoinColumns = @JoinColumn(name = "filter_id"))
+    private List<Filter> filters = new ArrayList<>();
 
 
     @Override

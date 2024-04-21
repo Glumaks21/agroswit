@@ -8,21 +8,25 @@ spring:
         locator:
           enabled: true
       routes:
-        - id: eureka-server
-          uri: http://localhost:7777
-          predicates:
-            - Path=/eureka
-          filters:
-            - SetPath=/
-        - id: discovery-server-static
-          uri: http://localhost:7777
-          predicates:
-            - Path=/eureka/**
+#        - id: product-service-detailed
+#          uri: lb://product-service
+#          predicates:
+#            - Method=GET
+#            - Path=/api/v1/products/**
+#          filters:
+##            - RewritePath=/api/v1/products, /api/v1/products/detailed
+#            - RewritePath=/api/v1/products/(?<segment>.*), /api/v1/products/detailed/$\{segment}
+#
+#        - id: product-service-post-update-delete
+#          uri: lb://product-service
+#          predicates:
+#            - Method=POST,UPDATE,DELETE
+#            - Path=/api/v1/products/**
 
         - id: product-service
           uri: lb://product-service
           predicates:
-            - Path=/api/v1/categories/**, /api/v1/products/**, /api/v1/producers/**
+            - Path=/api/v1/categories/**, /api/v1/producers/**, /api/v1/products/**
         - id: product-service-swagger
           uri: lb://product-service
           predicates:
@@ -70,8 +74,3 @@ management:
   endpoints:
     web:
       base-path: /management
-
-eureka:
-  client:
-    serviceUrl:
-      defaultZone: http://localhost:7777/eureka

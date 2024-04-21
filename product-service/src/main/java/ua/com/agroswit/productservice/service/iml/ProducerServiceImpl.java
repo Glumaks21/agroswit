@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ua.com.agroswit.productservice.dto.ProducerDTO;
 import ua.com.agroswit.productservice.dto.mapper.ProducerMapper;
+import ua.com.agroswit.productservice.dto.request.ProducerModifiableDTO;
 import ua.com.agroswit.productservice.exceptions.ResourceInConflictStateException;
 import ua.com.agroswit.productservice.exceptions.ResourceNotFoundException;
 import ua.com.agroswit.productservice.repository.ProducerRepository;
@@ -23,6 +24,7 @@ public class ProducerServiceImpl implements ProducerService {
     private final ProducerRepository producerRepo;
     private final ProducerMapper mapper;
     private final MinioUploadService uploadService;
+
 
     @Override
     @Transactional(readOnly = true)
@@ -54,10 +56,10 @@ public class ProducerServiceImpl implements ProducerService {
 
     @Override
     @Transactional
-    public ProducerDTO create(ProducerDTO dto) {
-        if (producerRepo.existsByName(dto.name())) {
+    public ProducerDTO create(ProducerModifiableDTO dto) {
+        if (producerRepo.existsByName(dto.getName())) {
             throw new ResourceInConflictStateException(String.format(
-                    "Producer with name %s already exists", dto.name())
+                    "Producer with name %s already exists", dto.getName())
             );
         }
 
@@ -76,13 +78,14 @@ public class ProducerServiceImpl implements ProducerService {
                         "Producer with id %d not found", producerId))
                 );
 
-        if (producer.getLogo() != null) {
-            log.trace("Deleting producer logo from storage");
-            uploadService.remove(producer.getLogo());
-        }
 
         log.trace("Saving producer logo to storage: {}", logo.getOriginalFilename());
         var logoName = uploadService.uploadImage(logo);
+
+        if (producer.getLogo() != null) {
+            log.trace("Deleting producer previous logo from storage");
+            uploadService.remove(producer.getLogo());
+        }
 
         producer.setLogo(logoName);
         log.info("Updating producer with new logo in db: {}", producer);
@@ -93,15 +96,15 @@ public class ProducerServiceImpl implements ProducerService {
 
     @Override
     @Transactional
-    public ProducerDTO update(Integer id, ProducerDTO dto) {
+    public ProducerDTO update(Integer id, ProducerModifiableDTO dto) {
         var producer = producerRepo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format(
                         "Producer with id %d not found", id))
                 );
 
-        if (producerRepo.existsByName(dto.name())) {
+        if (producer.getName() != null && !producer.getName().equals(dto.getName()) && producerRepo.existsByName(dto.getName())) {
             throw new ResourceInConflictStateException(String.format(
-                    "Producer with name %s already exists", dto.name())
+                    "Producer with name %s already exists", dto.getName())
             );
         }
 
@@ -114,7 +117,7 @@ public class ProducerServiceImpl implements ProducerService {
 
     @Override
     @Transactional
-    public void delete(Integer id) {
+    public void deleteById(Integer id) {
         producerRepo.findById(id)
                 .ifPresent(p -> {
                     if (p.getLogo() != null) {
@@ -129,7 +132,7 @@ public class ProducerServiceImpl implements ProducerService {
 
     @Override
     @Transactional
-    public void deleteLogoById(Integer id) {
+    public void removeLogoById(Integer id) {
         var producer = producerRepo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format(
                         "Producer with id %d not found", id))

@@ -1,4 +1,4 @@
-package ua.com.agroswit.productservice.controller.advice;
+package ua.com.agroswit.controller.advice;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.data.domain.Page;

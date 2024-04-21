@@ -1,0 +1,119 @@
+version: "3.9"
+
+services:
+  config-server:
+    container_name: config-server
+    image: glumaks/config-server
+    restart: unless-stopped
+    healthcheck:
+      test: curl --fail http://localhost:8888/management || exit 1
+      interval: 10s
+      timeout: 2s
+      retries: 5
+    env_file:
+      - .env.prod
+    networks:
+      - cloud-network
+
+  discovery-server:
+    container_name: discovery-server
+    image: glumaks/discovery-server
+    restart: unless-stopped
+    healthcheck:
+      test: curl --fail http://localhost:7777/eureka/apps || exit 1
+      interval: 10s
+      timeout: 2s
+      retries: 5
+    depends_on:
+      config-server:
+        condition: service_healthy
+    networks:
+      - cloud-network
+
+  gateway-server:
+    container_name: gateway-server
+    image: glumaks/gateway-server
+    restart: unless-stopped
+    healthcheck:
+      test: curl --fail http://localhost:8080/management || exit 1
+      interval: 10s
+      timeout: 2s
+      retries: 5
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker,dev
+    depends_on:
+      discovery-server:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    networks:
+      - cloud-network
+
+  product-service:
+    container_name: product-service
+    image: glumaks/product-service
+    restart: unless-stopped
+    environment:
+      - DB_URL=${PRODUCT_SERVICE_DB_URL}
+      - DB_USERNAME=${PRODUCT_SERVICE_DB_USERNAME}
+      - DB_PASSWORD=${PRODUCT_SERVICE_DB_PASSWORD}
+      - MINIO_URL=http://${HOST_IP}:9000
+      - MINIO_BUCKET=${PRODUCT_SERVICE_MINIO_BUCKET}
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+    depends_on:
+      gateway-server:
+        condition: service_healthy
+    networks:
+      - cloud-network
+
+  inventory-service:
+    container_name: inventory-service
+    image: glumaks/inventory-service
+    restart: unless-stopped
+    environment:
+      - SPRING_R2DBC_URL=${INVENTORY_SERVICE_DB_URL}
+      - SPRING_R2DBC_USERNAME=${INVENTORY_SERVICE_DB_USERNAME}
+      - SPRING_R2DBC_PASSWORD=${INVENTORY_SERVICE_DB_PASSWORD}
+    depends_on:
+      gateway-server:
+        condition: service_healthy
+    networks:
+      - cloud-network
+
+  redis:
+    image: redis:7.2.4-alpine
+    container_name: redis
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+    command: redis-server --save 60 1 --loglevel warning --requirepass ${REDIS_PASSWORD}
+    networks:
+      - cloud-network
+    volumes:
+      - cache:/data
+
+  minio:
+    image: minio/minio:RELEASE.2024-04-06T05-26-02Z.fips
+    restart: unless-stopped
+    ports:
+      - '9090:9090'
+      - '9000:9000'
+    command: server ~/minio --console-address :9090
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ACCESS_KEY}
+      - MINIO_ROOT_PASSWORD=${MINIO_SECRET_KEY}
+    networks:
+      - cloud-network
+    volumes:
+      - minio_data:/data
+
+networks:
+  cloud-network:
+    driver: bridge
+
+volumes:
+  minio_data:
+    driver: local
+  cache:
+    driver: local

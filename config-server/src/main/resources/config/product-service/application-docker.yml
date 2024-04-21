@@ -2,9 +2,3 @@ eureka:
   client:
     serviceUrl:
       defaultZone: http://discovery-server:7777/eureka
-
-minio:
-  bucket: ${MINIO_BUCKET}
-  endpoint: http://minio:9000
-  access-key: ${MINIO_ACCESS_KEY}
-  secret-key: ${MINIO_SECRET_KEY}
