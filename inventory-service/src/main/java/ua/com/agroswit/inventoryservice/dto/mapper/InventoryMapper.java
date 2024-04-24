@@ -4,7 +4,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import ua.com.agroswit.inventoryservice.dto.InventoryDetailedDTO;
-import ua.com.agroswit.inventoryservice.dto.ProductServiceProductDTO;
+import ua.com.agroswit.inventoryservice.dto.CatalogServiceProductDTO;
 import ua.com.agroswit.inventoryservice.dto.InventoryDTO;
 import ua.com.agroswit.inventoryservice.model.Inventory;
 
@@ -17,7 +17,7 @@ public interface InventoryMapper {
     List<InventoryDTO> toDTO(List<Inventory> entities);
 
     @Mapping(target = ".", source = "pdto")
-    InventoryDetailedDTO toDetailedDTO(Inventory entity, ProductServiceProductDTO pdto);
+    InventoryDetailedDTO toDetailedDTO(Inventory entity, CatalogServiceProductDTO pdto);
 
     Inventory toEntity(InventoryDTO dto);
 

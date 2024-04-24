@@ -3,7 +3,7 @@ version: "3.9"
 services:
   config-server:
     container_name: config-server
-    image: glumaks/config-server
+    image: glumaks/agroswit-config-server
     restart: unless-stopped
     healthcheck:
       test: curl --fail http://localhost:8888/management || exit 1
@@ -17,7 +17,7 @@ services:
 
   discovery-server:
     container_name: discovery-server
-    image: glumaks/discovery-server
+    image: glumaks/agroswit-discovery-server
     restart: unless-stopped
     healthcheck:
       test: curl --fail http://localhost:7777/eureka/apps || exit 1
@@ -27,20 +27,20 @@ services:
     depends_on:
       config-server:
         condition: service_healthy
+    ports:
+      - "7777:7777"
     networks:
       - cloud-network
 
   gateway-server:
     container_name: gateway-server
-    image: glumaks/gateway-server
+    image: glumaks/agroswit-gateway-server
     restart: unless-stopped
     healthcheck:
       test: curl --fail http://localhost:8080/management || exit 1
       interval: 10s
       timeout: 2s
       retries: 5
-    environment:
-      - SPRING_PROFILES_ACTIVE=docker,dev
     depends_on:
       discovery-server:
         condition: service_healthy
@@ -49,14 +49,14 @@ services:
     networks:
       - cloud-network
 
-  product-service:
-    container_name: product-service
-    image: glumaks/product-service
+  catalog-service:
+    container_name: catalog-service
+    image: glumaks/agroswit-catalog-service
     restart: unless-stopped
     environment:
       - DB_URL=${PRODUCT_SERVICE_DB_URL}
-      - DB_USERNAME=${PRODUCT_SERVICE_DB_USERNAME}
-      - DB_PASSWORD=${PRODUCT_SERVICE_DB_PASSWORD}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
       - MINIO_URL=http://${HOST_IP}:9000
       - MINIO_BUCKET=${PRODUCT_SERVICE_MINIO_BUCKET}
       - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
@@ -69,29 +69,17 @@ services:
 
   inventory-service:
     container_name: inventory-service
-    image: glumaks/inventory-service
+    image: glumaks/agroswit-inventory-service
     restart: unless-stopped
     environment:
-      - SPRING_R2DBC_URL=${INVENTORY_SERVICE_DB_URL}
-      - SPRING_R2DBC_USERNAME=${INVENTORY_SERVICE_DB_USERNAME}
-      - SPRING_R2DBC_PASSWORD=${INVENTORY_SERVICE_DB_PASSWORD}
+      - DB_URL=${INVENTORY_SERVICE_DB_URL}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
     depends_on:
       gateway-server:
         condition: service_healthy
     networks:
       - cloud-network
-
-  redis:
-    image: redis:7.2.4-alpine
-    container_name: redis
-    restart: unless-stopped
-    ports:
-      - '6379:6379'
-    command: redis-server --save 60 1 --loglevel warning --requirepass ${REDIS_PASSWORD}
-    networks:
-      - cloud-network
-    volumes:
-      - cache:/data
 
   minio:
     image: minio/minio:RELEASE.2024-04-06T05-26-02Z.fips

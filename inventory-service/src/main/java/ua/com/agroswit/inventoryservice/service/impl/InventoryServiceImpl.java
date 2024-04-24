@@ -9,10 +9,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import ua.com.agroswit.inventoryservice.config.ProductClient;
+import ua.com.agroswit.inventoryservice.config.CatalogClient;
+import ua.com.agroswit.inventoryservice.dto.CatalogServiceProductDTO;
 import ua.com.agroswit.inventoryservice.dto.InventoryDTO;
 import ua.com.agroswit.inventoryservice.dto.InventoryDetailedDTO;
-import ua.com.agroswit.inventoryservice.dto.ProductServiceProductDTO;
 import ua.com.agroswit.inventoryservice.dto.mapper.InventoryMapper;
 import ua.com.agroswit.inventoryservice.exception.ResourceInConflictStateException;
 import ua.com.agroswit.inventoryservice.exception.ResourceNotFoundException;
@@ -32,7 +32,7 @@ public class InventoryServiceImpl implements InventoryService {
 
     private final InventoryRepository inventoryRepo;
     private final InventoryMapper mapper;
-    private final ProductClient productClient;
+    private final CatalogClient productClient;
 
 
     @Override
@@ -84,7 +84,7 @@ public class InventoryServiceImpl implements InventoryService {
     }
 
     private List<InventoryDetailedDTO> collectToDTO(List<Inventory> inventories,
-                                                    List<ProductServiceProductDTO> products) {
+                                                    List<CatalogServiceProductDTO> products) {
         var dtos = new ArrayList<InventoryDetailedDTO>(inventories.size());
         for (var i : inventories) {
             for (var p : products) {

@@ -14,15 +14,15 @@ public class BeanConfig {
     @LoadBalanced
     WebClient.Builder webClientBuilder() {
         return WebClient.builder()
-                .baseUrl("http://product-service");
+                .baseUrl("http://catalog-service");
     }
 
     @Bean
-    ProductClient productClient() {
-        var proxyFactory = HttpServiceProxyFactory
+    CatalogClient catalogClient() {
+        return HttpServiceProxyFactory
                 .builderFor(WebClientAdapter.create(webClientBuilder().build()))
-                .build();
-        return proxyFactory.createClient(ProductClient.class);
+                .build()
+                .createClient(CatalogClient.class);
     }
 
 }

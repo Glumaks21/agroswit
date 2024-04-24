@@ -23,14 +23,14 @@ spring:
 #            - Method=POST,UPDATE,DELETE
 #            - Path=/api/v1/products/**
 
-        - id: product-service
-          uri: lb://product-service
+        - id: catalog-service
+          uri: lb://catalog-service
           predicates:
-            - Path=/api/v1/categories/**, /api/v1/producers/**, /api/v1/products/**
-        - id: product-service-swagger
-          uri: lb://product-service
+            - Path=/api/v1/categories/**, /api/v1/producers/**, /api/v1/products/**, /api/v1/pests/**, /api/v1/cultures/**, /api/v1/filters/**
+        - id: catalog-service-swagger
+          uri: lb://catalog-service
           predicates:
-            - Path=/product-service/v3/api-docs
+            - Path=/catalog-service/v3/api-docs
           filters:
             - StripPrefix=1
 
@@ -45,16 +45,16 @@ spring:
           filters:
             - StripPrefix=1
 
-        - id: order-service
-          uri: lb://order-service
-          predicates:
-            - Path=/api/v1/orders/**
-        - id: order-service-swagger
-          uri: lb://order-service
-          predicates:
-            - Path=/order-service/v3/api-docs
-          filters:
-            - StripPrefix=1
+#        - id: order-service
+#          uri: lb://order-service
+#          predicates:
+#            - Path=/api/v1/orders/**
+#        - id: order-service-swagger
+#          uri: lb://order-service
+#          predicates:
+#            - Path=/order-service/v3/api-docs
+#          filters:
+#            - StripPrefix=1
 
 springdoc:
   swagger-ui:
@@ -65,10 +65,10 @@ springdoc:
         name: API Gateway Service
       - url: /inventory-service/v3/api-docs
         name: Inventory Service
-      - url: /product-service/v3/api-docs
-        name: Product Service
-      - url: /order-service/v3/api-docs
-        name: Order Service
+      - url: /catalog-service/v3/api-docs
+        name: Catalog Service
+#      - url: /order-service/v3/api-docs
+#        name: Order Service
 
 management:
   endpoints:

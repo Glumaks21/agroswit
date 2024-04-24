@@ -1,0 +1,22 @@
+spring:
+  config:
+    import: optional:configserver:http://loclahost:8888
+  datasource:
+    url: jdbc:mysql://localhost:3306/agroswit
+    username: user
+    password: pass
+  data:
+    redis:
+      host:
+      port:
+      password:
+
+jwt:
+  secret: 20552043173f635e17935047ff98472351349a6d9537c9be98cd6f05235b29b3
+  access_expiration: 180000
+  refresh_expiration: 300000
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:7777/eureka

@@ -27,6 +27,8 @@ services:
     depends_on:
       config-server:
         condition: service_healthy
+    ports:
+      - '7777:7777'
     networks:
       - cloud-network
 
@@ -48,16 +50,16 @@ services:
     networks:
       - cloud-network
 
-  product-service:
-    container_name: product-service
+  catalog-service:
+    container_name: catalog-service
     build:
-      context: ./product-service
+      context: ./catalog-service
     restart: unless-stopped
     environment:
       - DB_URL=jdbc:mysql://db:3306/${DB_DATABASE}
       - DB_USERNAME=${DB_USERNAME}
       - DB_PASSWORD=${DB_PASSWORD}
-      - MINIO_URL=http://host-gateway:9000
+      - MINIO_URL=http://${HOST_IP}:9000
       - MINIO_BUCKET=${PRODUCT_SERVICE_MINIO_BUCKET}
       - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
       - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
@@ -66,8 +68,6 @@ services:
         condition: service_healthy
     networks:
       - cloud-network
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
 
   inventory-service:
     container_name: inventory-service
