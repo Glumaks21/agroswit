@@ -114,6 +114,8 @@ services:
   db:
     container_name: db
     image: mysql:8.3
+    restart: unless-stopped
+
     ports:
       - "3306:3306"
     environment:

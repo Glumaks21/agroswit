@@ -9,3 +9,7 @@ spring:
     name: catalog-service
   config:
     import: "optional:configserver:http://localhost:8888"
+  cache:
+    redis:
+      time-to-live: 300000
+      cache-null-values: false

@@ -50,13 +50,13 @@ public class GlobalExceptionHandler  extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
         var errors = new HashMap<String, Set<String>>();
         ex.getAllErrors().forEach(e -> {
-                    var name = e.getObjectName();
-                    if (e instanceof FieldError fe) {
-                        name = fe.getField();
-                    }
+            var name = e.getObjectName();
+            if (e instanceof FieldError fe) {
+                name = fe.getField();
+            }
 
-                    errors.computeIfAbsent(name, key -> new HashSet<>()).add(e.getDefaultMessage());
-                });
+            errors.computeIfAbsent(name, key -> new HashSet<>()).add(e.getDefaultMessage());
+        });
 
         var problemDetail = ex.getBody();
         problemDetail.setTitle("Validation error");

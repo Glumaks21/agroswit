@@ -5,16 +5,11 @@ spring:
     url: jdbc:mysql://localhost:3306/agroswit
     username: user
     password: pass
-  data:
-    redis:
-      host:
-      port:
-      password:
 
 jwt:
-  secret: 20552043173f635e17935047ff98472351349a6d9537c9be98cd6f05235b29b3
-  access_expiration: 180000
-  refresh_expiration: 300000
+  secret: 6E5A7234753778214125442A472D4A614E645267556B58703273357638792F42
+  access_expiration: 15
+  refresh_expiration: 30
 
 eureka:
   client:
