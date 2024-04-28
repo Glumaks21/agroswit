@@ -2,11 +2,10 @@ package ua.com.agroswit.authservice.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ua.com.agroswit.authservice.model.UserDetailsImpl;
+import ua.com.agroswit.authservice.model.AuthorizedUser;
 import ua.com.agroswit.authservice.config.JwtProperties;
 import ua.com.agroswit.authservice.dto.mapper.UserMapper;
 import ua.com.agroswit.authservice.dto.request.LoginDTO;
@@ -88,7 +87,7 @@ public class AuthServiceImpl implements AuthService {
         sessionRepo.save(session);
 
         var refreshToken = session.getRefreshToken();
-        var accessToken = jwtUtil.generate(UserDetailsImpl.from(user));
+        var accessToken = jwtUtil.generate(AuthorizedUser.from(user));
         return new JwtResponse(accessToken, refreshToken.toString());
     }
 
@@ -129,7 +128,7 @@ public class AuthServiceImpl implements AuthService {
         sessionRepo.save(newSession);
 
         var newRefreshToken = newSession.getRefreshToken();
-        var accessToken = jwtUtil.generate(UserDetailsImpl.from(user));
+        var accessToken = jwtUtil.generate(AuthorizedUser.from(user));
         return new JwtResponse(accessToken, newRefreshToken.toString());
     }
 

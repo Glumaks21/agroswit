@@ -13,13 +13,6 @@ spring:
     problemdetails:
       enabled: true
 
-management:
-  endpoints:
-    web:
-      exposure:
-        include: "*"
-      base-path: /management
-
 springdoc:
   api-docs:
     path: /v3/api-docs

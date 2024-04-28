@@ -1,0 +1,9 @@
+eureka:
+  username: root
+  password: root
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"

@@ -8,7 +8,7 @@ CREATE TABLE users(
     phone varchar(12) not null unique ,
     password varchar(200) not null,
     created_at datetime not null ,
-    modified_at datetime,
+    modified_at datetime not null ,
     primary key (id)
 );
 

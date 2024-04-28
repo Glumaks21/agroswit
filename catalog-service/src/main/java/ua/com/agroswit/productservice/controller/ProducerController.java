@@ -8,27 +8,42 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ua.com.agroswit.productservice.dto.ProducerDTO;
+import ua.com.agroswit.productservice.dto.ProductDTO;
+import ua.com.agroswit.productservice.dto.response.SimpleDetailedProductDTO;
 import ua.com.agroswit.productservice.service.ProducerService;
+import ua.com.agroswit.productservice.service.ProductService;
 
 import java.net.URI;
+import java.security.Principal;
+import java.util.Collection;
 import java.util.List;
 
 import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
-@Tag(name = "Producer", description = "Producer management API")
+@Tag(name = "Producer management API")
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/producers")
 @RequiredArgsConstructor
 public class ProducerController {
 
+    private final ProductService productService;
     private final ProducerService service;
+
 
     @ApiResponses({
             @ApiResponse(responseCode = "200",
@@ -51,6 +66,18 @@ public class ProducerController {
     @GetMapping(produces = APPLICATION_JSON_VALUE, params = "name")
     ProducerDTO getByName(@RequestParam String name) {
         return service.getByName(name);
+    }
+
+    @Operation(summary = "Retrieve all products of producer by id")
+    @GetMapping(path = "/{id}/products", produces = APPLICATION_JSON_VALUE)
+    ResponseEntity<Collection<SimpleDetailedProductDTO>> getAllProductsById(@PathVariable Integer id,
+                                                                            @ParameterObject @PageableDefault Pageable pageable) {
+        var page = service.getAllByProductsById(id, pageable);
+
+        var headers = new HttpHeaders();
+        headers.add("X-Total-Count", String.valueOf(page.getTotalElements()));
+
+        return new ResponseEntity<>(page.getContent(), headers, OK);
     }
 
     @Operation(summary = "Create new producer")

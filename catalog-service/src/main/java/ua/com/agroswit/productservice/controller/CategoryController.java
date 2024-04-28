@@ -63,8 +63,14 @@ public class CategoryController {
         return service.getByName(name);
     }
 
+    @Operation(summary = "Retrieve all producers of products in category")
+    @GetMapping(path = "/{id}/producers", produces = APPLICATION_JSON_VALUE)
+    Collection<ProducerDTO> getAllProducers(@PathVariable Integer id) {
+        return service.getAllProducersById(id);
+    }
+
     @Operation(summary = "Retrieve all products by category ID")
-    @GetMapping(path = "/{id}/products")
+    @GetMapping(path = "/{id}/products", produces = APPLICATION_JSON_VALUE)
     ResponseEntity<Collection<SimpleDetailedProductDTO>> getAllProducts(
             @PathVariable Integer id,
             @ParameterObject @PageableDefault Pageable pageable) {

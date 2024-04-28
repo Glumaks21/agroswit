@@ -2,12 +2,11 @@ package ua.com.agroswit.authservice.utils;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ua.com.agroswit.authservice.config.JwtProperties;
-import ua.com.agroswit.authservice.model.UserDetailsImpl;
+import ua.com.agroswit.authservice.model.AuthorizedUser;
 
 import javax.crypto.SecretKey;
 import java.util.Base64;
@@ -22,7 +21,7 @@ public class JwtUtil {
     private final JwtProperties jwtProps;
 
 
-    public boolean isValid(String token, UserDetailsImpl user) {
+    public boolean isValid(String token, AuthorizedUser user) {
         return user.email().equals(getSubject(token))
                 && getExpirationDate(token).after(new Date());
     };
@@ -47,7 +46,7 @@ public class JwtUtil {
                 .getPayload();
     }
 
-    public String generate(UserDetailsImpl user) {
+    public String generate(AuthorizedUser user) {
         return Jwts.builder()
                 .subject(user.getUsername())
                 .issuedAt(new Date())

@@ -25,16 +25,12 @@ public class Category {
     @GeneratedValue(strategy = IDENTITY)
     private Integer id;
 
-    @Size(max = 45, message = "Logo must be lower than 45 symbols")
     @Column(length = 45)
     private String logo;
 
-    @Size(min = 2, max = 50, message = "Name length must be between 2 and 50")
-    @NotBlank(message = "Name must not be blank")
     @Column(nullable = false, length = 50, unique = true)
     private String name;
 
-    @Size(min = 2, max = 300, message = "Description must be between 2 and 300")
     @Column(length = 300)
     private String description;
 
@@ -62,20 +58,6 @@ public class Category {
             inverseJoinColumns = @JoinColumn(name = "filter_id"))
     private List<Filter> filters = new ArrayList<>();
 
-
-    public void setName(String name) {
-        if (name != null && !name.isEmpty()) {
-            name = name.trim();
-        }
-        this.name = name;
-    }
-
-    public void setDescription(String description) {
-        if (description != null && !description.isEmpty()) {
-            description = description.trim();
-        }
-        this.description = description;
-    }
 
     @Override
     public final boolean equals(Object o) {

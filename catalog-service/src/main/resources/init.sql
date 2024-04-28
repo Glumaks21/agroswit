@@ -35,7 +35,7 @@ create table category_property_group
 
 create table category_property
 (
-    group_id integer      not null,
+    group_id integer     not null,
     name     varchar(50) not null,
     constraint cat_prop_group_id_uk
         foreign key (group_id)
@@ -45,9 +45,10 @@ create table category_property
 
 create table producer
 (
-    id   integer      not null auto_increment,
-    logo varchar(45) unique,
-    name varchar(100) not null unique,
+    id          integer     not null auto_increment,
+    logo        varchar(45) unique,
+    name        varchar(50) not null unique,
+    description varchar(100),
     primary key (id)
 );
 
@@ -62,9 +63,11 @@ create table product
     recommendations   varchar(400),
     active            bit                      not null default true,
     volume            integer                  not null,
-    unit              enum ('SEED', 'KG', 'L') not null,
+    unit              enum ('SEED', 'KG', 'LITER') not null,
     producer_id       integer,
     category_id       integer,
+    created_at        datetime                 not null,
+    modified_at       datetime                 not null,
     primary key (id),
     constraint product_prod_id_fk
         foreign key (producer_id)
@@ -100,6 +103,7 @@ create table product_packages
     id         integer   not null auto_increment,
     product_id integer   not null,
     price      float(53) not null,
+    old_price  float(53) not null,
     count      integer   not null,
     primary key (id),
     constraint prod_pckgs_prod_id_fk foreign key

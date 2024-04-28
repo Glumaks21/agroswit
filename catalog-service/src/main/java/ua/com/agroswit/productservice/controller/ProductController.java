@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springdoc.core.annotations.ParameterObject;
@@ -28,6 +29,7 @@ import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
+@Tag(name = "Product management API")
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/products")
@@ -60,8 +62,9 @@ public class ProductController {
         return service.getById(id);
     }
 
+    @Operation(summary = "Retrieve all by ids", hidden = true)
     @GetMapping(params = "id", produces = APPLICATION_JSON_VALUE)
-    List<ProductDTO> getByIds(@RequestParam(name = "id") List<Integer> ids) {
+    List<ProductDTO> getByIds(@RequestParam(name = "id") Set<Integer> ids) {
         return service.getAllByIds(ids);
     }
 

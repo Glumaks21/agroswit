@@ -69,8 +69,3 @@ springdoc:
         name: Catalog Service
 #      - url: /order-service/v3/api-docs
 #        name: Order Service
-
-management:
-  endpoints:
-    web:
-      base-path: /management

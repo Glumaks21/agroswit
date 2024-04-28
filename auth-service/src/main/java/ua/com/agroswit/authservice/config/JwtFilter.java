@@ -5,7 +5,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -13,7 +12,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import ua.com.agroswit.authservice.model.UserDetailsImpl;
+import ua.com.agroswit.authservice.model.AuthorizedUser;
 import ua.com.agroswit.authservice.utils.JwtUtil;
 
 import java.io.IOException;
@@ -46,7 +45,7 @@ public class JwtFilter extends OncePerRequestFilter {
         var token = authHeader.substring(BEARER_PREFIX.length());
         var email = jwtUtil.extractEmail(token);
         if (!email.isBlank() && SecurityContextHolder.getContext().getAuthentication() == null) {
-            var userDetails = (UserDetailsImpl) userDetailsService.loadUserByUsername(email);
+            var userDetails = (AuthorizedUser) userDetailsService.loadUserByUsername(email);
 
             if (jwtUtil.isValid(token, userDetails)) {
                 var authentication = new UsernamePasswordAuthenticationToken(

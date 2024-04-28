@@ -5,6 +5,11 @@ spring:
       on-profile: docker
 ---
 spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:9000
   application:
     name: catalog-service
   config:
@@ -13,3 +18,7 @@ spring:
     redis:
       time-to-live: 300000
       cache-null-values: false
+
+logging:
+  level:
+    org.springframework.security: trace

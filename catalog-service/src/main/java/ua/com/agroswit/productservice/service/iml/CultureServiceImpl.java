@@ -2,6 +2,7 @@ package ua.com.agroswit.productservice.service.iml;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ua.com.agroswit.productservice.dto.mapper.CultureMapper;
@@ -40,6 +41,7 @@ public class CultureServiceImpl implements CultureService {
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public CultureDTO create(CultureDTO dto) {
         if (cultureRepo.existsByNameIgnoreCase(dto.name())) {
@@ -54,6 +56,7 @@ public class CultureServiceImpl implements CultureService {
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public void deleteById(Integer id) {
         log.info("Deleting culture with id from db: {}", id);

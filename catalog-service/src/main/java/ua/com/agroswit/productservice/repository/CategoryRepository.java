@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import ua.com.agroswit.productservice.model.Category;
+import ua.com.agroswit.productservice.model.Producer;
 
 import java.util.List;
 import java.util.Optional;

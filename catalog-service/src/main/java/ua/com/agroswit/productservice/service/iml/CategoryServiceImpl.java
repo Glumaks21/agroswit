@@ -4,10 +4,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ua.com.agroswit.productservice.dto.CategoryDTO;
+import ua.com.agroswit.productservice.dto.ProducerDTO;
 import ua.com.agroswit.productservice.dto.response.SimplifiedCategoryDTO;
 import ua.com.agroswit.productservice.dto.mapper.CategoryMapper;
 import ua.com.agroswit.productservice.dto.response.SimpleDetailedProductDTO;
@@ -73,6 +75,17 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional(readOnly = true)
+    public List<ProducerDTO> getAllProducersById(Integer id) {
+        if (!categoryRepo.existsById(id)) {
+            throw new ResourceNotFoundException(String.format(
+                    "Category with id %d not found", id)
+            );
+        }
+        return List.of();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public Page<SimpleDetailedProductDTO> getAllProductsById(Integer id, Pageable pageable) {
         if (!categoryRepo.existsById(id)) {
             throw new ResourceNotFoundException(String.format(
@@ -83,6 +96,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public CategoryDTO create(CategoryDTO dto) {
         if (categoryRepo.existsByNameIgnoreCase(dto.name())) {
@@ -142,6 +156,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public String saveLogo(Integer categoryId, MultipartFile logo) {
         var category = categoryRepo.findById(categoryId)
@@ -163,6 +178,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public CategoryDTO update(Integer id, CategoryDTO dto) {
         var category = validateUpdate(id, dto);
@@ -198,6 +214,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public void deleteById(Integer id, Integer replaceCategoryId) {
         var optionalCat = categoryRepo.findById(id);
@@ -230,6 +247,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public void deleteLogoById(Integer categoryId) {
         var category = categoryRepo.findById(categoryId)

@@ -2,6 +2,7 @@ package ua.com.agroswit.productservice.service.iml;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ua.com.agroswit.productservice.dto.mapper.FilterMapper;
@@ -27,17 +28,13 @@ public class FilterServiceImpl implements FilterService {
     @Override
     @Transactional(readOnly = true)
     public List<FilterDTO> getAllHighLevel() {
-        return filterRepo.findAllByParentFilterNull().stream()
-                .map(mapper::toDTO)
-                .toList();
+        return mapper.toDTOs(filterRepo.findAllByParentFilterNull());
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<FilterDTO> getAllByIds(Collection<Integer> ids) {
-        return filterRepo.findAllById(ids).stream()
-                .map(mapper::toDTO)
-                .toList();
+        return mapper.toDTOs(filterRepo.findAllById(ids));
     }
 
     @Override
@@ -52,6 +49,7 @@ public class FilterServiceImpl implements FilterService {
 
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public FilterDTO create(FilterDTO dto) {
         if (filterRepo.existsByName(dto.name())) {
@@ -76,6 +74,7 @@ public class FilterServiceImpl implements FilterService {
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public FilterDTO update(Integer id, FilterDTO dto) {
         if (id.equals(dto.parentFilterId())) {
@@ -116,6 +115,7 @@ public class FilterServiceImpl implements FilterService {
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public void deleteById(Integer id) {
         log.info("Deleting filter with id {} from db", id);

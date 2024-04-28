@@ -22,13 +22,12 @@ public class Package {
     @GeneratedValue(strategy = IDENTITY)
     private Integer id;
 
-    @NotNull(message = "Price is required")
-    @Positive(message = "Price must be positive")
     @Column(nullable = false)
     private Double price;
 
-    @NotNull(message = "Count is required")
-    @Positive(message = "Count must be positive")
+    @Column(nullable = false)
+    private Double oldPrice;
+
     @Column(nullable = false)
     private Integer count;
 

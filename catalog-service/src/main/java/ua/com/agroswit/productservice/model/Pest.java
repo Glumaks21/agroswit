@@ -22,18 +22,9 @@ public class Pest {
     @GeneratedValue(strategy = IDENTITY)
     private Integer id;
 
-    @Size(min = 2, max = 50, message = "Name must be between 2 and 50 symbols")
-    @NotBlank(message = "Name must not be blank")
     @Column(length = 50, nullable = false, unique = true)
     private String name;
 
-
-    public void setName(String name) {
-        if (name != null && !name.isEmpty()) {
-            name = name.trim();
-        }
-        this.name = name;
-    }
 
     @Override
     public final boolean equals(Object o) {

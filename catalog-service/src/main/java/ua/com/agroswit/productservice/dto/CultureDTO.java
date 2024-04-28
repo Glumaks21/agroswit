@@ -12,5 +12,11 @@ public record CultureDTO(
 
         @Size(min = 2, max = 50, message = "Name must be between 2 and 50 symbols")
         @NotBlank(message = "Name must not be blank")
-        String name) {
+        String name
+) {
+
+    public CultureDTO(Integer id, String name) {
+        this.id = id;
+        this.name = name != null ? name.trim() : null;
+    }
 }

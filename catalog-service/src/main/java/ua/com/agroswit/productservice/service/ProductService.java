@@ -3,6 +3,7 @@ package ua.com.agroswit.productservice.service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
+import ua.com.agroswit.productservice.dto.ProducerDTO;
 import ua.com.agroswit.productservice.dto.response.DetailedProductDTO;
 import ua.com.agroswit.productservice.dto.request.ProductSearchParams;
 import ua.com.agroswit.productservice.dto.ProductDTO;
@@ -17,7 +18,9 @@ public interface ProductService {
     List<ProductDTO> getAllByIds(Collection<Integer> ids);
     Page<SimpleDetailedProductDTO> getAllDetailed(Pageable pageable, ProductSearchParams searchParams);
     Page<SimpleDetailedProductDTO> getAllDetailedByCategoryId(Pageable pageable, Integer categoryId);
+    Page<SimpleDetailedProductDTO> getAllDetailedByProducerId(Integer producerId, Pageable pageable);
     DetailedProductDTO getDetailedById(Integer id);
+    List<ProducerDTO> getAllProducersOfProductsByCategoryById(Integer categoryId);
     ProductDTO create(ProductDTO dto);
     String saveImageById(Integer id, MultipartFile image);
     ProductDTO fullUpdateById(Integer id, ProductDTO dto);

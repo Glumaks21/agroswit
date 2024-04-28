@@ -1,6 +1,7 @@
 package ua.com.agroswit.productservice.dto.mapper;
 
 import org.mapstruct.*;
+import ua.com.agroswit.productservice.dto.enums.ProductState;
 import ua.com.agroswit.productservice.dto.response.DetailedProductDTO;
 import ua.com.agroswit.productservice.dto.response.InventoryServiceDTO;
 import ua.com.agroswit.productservice.dto.ProductDTO;
@@ -9,6 +10,7 @@ import ua.com.agroswit.productservice.model.Filter;
 import ua.com.agroswit.productservice.model.Package;
 import ua.com.agroswit.productservice.model.Product;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -24,6 +26,7 @@ public interface ProductMapper {
     @Mapping(target = "categoryId", source = "category.id")
     @Mapping(target = "producerId", source = "producer.id")
     @Mapping(target = "filterIds", source = "filters")
+    @Mapping(target = "state", source = "createdAt")
     @Mapping(target = "imageUrl", expression = "java( imageUrl )")
     ProductDTO toDTO(Product product, @Context String imageUrl);
 
@@ -33,33 +36,38 @@ public interface ProductMapper {
                 .collect(Collectors.toSet());
     }
 
-    @Mapping(target = "categoryId", source = "product.category.id")
-    @Mapping(target = "producerId", source = "product.producer.id")
-    @Mapping(target = "filterIds", source = "product.filters")
-    @Mapping(target = "article1CId", source = "inventory.article1CId")
-    @Mapping(target = "inStock", source = "inventory.quantity")
-    @Mapping(target = "imageUrl", expression = "java( imageUrl )")
+    default ProductState mapToState(LocalDateTime createdAt) {
+        var sevenDaysAgo = LocalDateTime.now().minusDays(7);
+        if (createdAt != null && createdAt.isAfter(sevenDaysAgo)) {
+            return ProductState.NEW;
+        }
+        return null;
+    }
+
+    @Mapping(target = "product", source = "product")
+    @Mapping(target = "article1CId", source = "inventory.article1CId", nullValuePropertyMappingStrategy = IGNORE)
+    @Mapping(target = "inStock", source = "inventory.quantity", nullValuePropertyMappingStrategy = IGNORE)
     DetailedProductDTO toDetailedDTO(Product product, InventoryServiceDTO inventory, @Context String imageUrl);
 
-    @Mapping(target = "categoryId", source = "category.id")
-    @Mapping(target = "producerId", source = "producer.id")
-    @Mapping(target = "filterIds", source = "filters")
-    @Mapping(target = "imageUrl", expression = "java( imageUrl )")
-    DetailedProductDTO toDetailedDTO(Product product, @Context String imageUrl);
-
     default Boolean mapInStock(Integer quantity) {
-        return quantity != null ? quantity > 0: null;
+        return quantity > 0;
+    }
+
+    default DetailedProductDTO toDetailedDTO(Product product, @Context String imageUrl) {
+        return toDetailedDTO(product, null, imageUrl);
     }
 
     @Mapping(target = "producer", source = "product.producer.name")
     @Mapping(target = "price", source = "product.packages")
     @Mapping(target = "article1CId", source = "inventory.article1CId")
     @Mapping(target = "inStock", source = "inventory.quantity")
+    @Mapping(target = "state", source = "product.createdAt")
     @Mapping(target = "imageUrl", expression = "java( imageUrl )")
     SimpleDetailedProductDTO toSimpleDetailedDTO(Product product, InventoryServiceDTO inventory, @Context String imageUrl);
 
     @Mapping(target = "producer", source = "producer.name")
     @Mapping(target = "price", source = "packages")
+    @Mapping(target = "state", source = "createdAt")
     @Mapping(target = "imageUrl", expression = "java( imageUrl )")
     SimpleDetailedProductDTO toSimpleDetailedDTO(Product product, @Context String imageUrl);
 
@@ -70,6 +78,7 @@ public interface ProductMapper {
                 .orElse(null);
     }
 
+    @Mapping(target = "createdAt", ignore = true)
     @InheritInverseConfiguration
     Product toEntity(ProductDTO dto);
 

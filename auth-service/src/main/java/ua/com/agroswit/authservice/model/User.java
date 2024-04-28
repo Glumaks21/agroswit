@@ -42,6 +42,7 @@ public class User {
     @Column(length = 12, nullable = false, unique = true)
     private String phone;
 
+    @ToString.Exclude
     @Column(nullable = false)
     private String password;
 

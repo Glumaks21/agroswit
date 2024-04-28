@@ -26,22 +26,15 @@ public class Producer {
     @GeneratedValue(strategy = IDENTITY)
     private Integer id;
 
-    @Size(min = 2, max = 100, message = "Name must be between 2 and 100")
-    @NotBlank(message = "Name must not be blank")
-    @Column(length = 100, nullable = false, unique = true)
+    @Column(length = 50, nullable = false, unique = true)
     private String name;
 
-    @Size(max = 45, message = "Logo must be lower than 45")
+    @Column(length = 100)
+    private String description;
+
     @Column(length = 45, nullable = false, unique = true)
     private String logo;
 
-
-    public void setName(String name) {
-        if (name != null && !name.isEmpty()) {
-            name = name.trim();
-        }
-        this.name = name;
-    }
 
     @Override
     public final boolean equals(Object o) {

@@ -1,5 +1,6 @@
 package ua.com.agroswit.authservice.model;
 
+import lombok.ToString;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -8,13 +9,13 @@ import ua.com.agroswit.authservice.model.enums.Role;
 import java.util.Collection;
 import java.util.List;
 
-public record UserDetailsImpl  (
+public record AuthorizedUser(
     String email,
     String password,
     Role role) implements UserDetails {
 
-    public static UserDetailsImpl from(User user) {
-        return new UserDetailsImpl(user.getEmail(), user.getPassword(), user.getRole());
+    public static AuthorizedUser from(User user) {
+        return new AuthorizedUser(user.getEmail(), user.getPassword(), user.getRole());
     }
 
     @Override
@@ -50,5 +51,13 @@ public record UserDetailsImpl  (
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    @Override
+    public String toString() {
+        return "AuthorizedUser{" +
+                "email='" + email + '\'' +
+                "role=" + role +
+                '}';
     }
 }

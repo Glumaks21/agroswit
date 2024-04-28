@@ -3,12 +3,16 @@ package ua.com.agroswit.productservice.service.iml;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ua.com.agroswit.productservice.client.InventoryClient;
+import ua.com.agroswit.productservice.dto.ProducerDTO;
+import ua.com.agroswit.productservice.dto.mapper.ProducerMapper;
 import ua.com.agroswit.productservice.dto.mapper.ProductMapper;
 import ua.com.agroswit.productservice.dto.request.ProductSearchParams;
 import ua.com.agroswit.productservice.dto.response.DetailedProductDTO;
@@ -38,6 +42,7 @@ public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepo;
     private final MinioUploadService uploadService;
     private final ProductMapper mapper;
+    private final ProducerMapper producerMapper;
     private final InventoryClient inventoryClient;
 
 
@@ -89,13 +94,16 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional(readOnly = true)
     public Page<SimpleDetailedProductDTO> getAllDetailed(Pageable pageable, ProductSearchParams searchParams) {
-        var products = productRepo.findAll(createSpecification(searchParams), pageable);
+        var page = productRepo.findAll(createSpecification(searchParams), pageable);
+        var content = fetchDetails(page.getContent());
+        return new PageImpl<>(content, pageable, content.size());
+    }
 
+    private List<SimpleDetailedProductDTO> fetchDetails(Collection<Product> products) {
         var ids = products.stream().map(Product::getId).toList();
         log.trace("Requesting inventory records service for product ids: {}", ids);
         var inventories = inventoryClient.getByProductIds(ids);
-
-        return products
+        return products.stream()
                 .map(p -> {
                     for (var i : inventories) {
                         if (i.productId().equals(p.getId())) {
@@ -103,27 +111,32 @@ public class ProductServiceImpl implements ProductService {
                         }
                     }
                     return mapper.toSimpleDetailedDTO(p, uploadService.getUrl(p.getImage()));
-                });
+                })
+                .toList();
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<SimpleDetailedProductDTO> getAllDetailedByCategoryId(Pageable pageable, Integer categoryId) {
-        var products = productRepo.findAllByCategoryId(categoryId, pageable);
+        var page = productRepo.findAllByCategoryId(categoryId, pageable);
+        var content = fetchDetails(page.getContent());
+        return new PageImpl<>(content, pageable, content.size());
+    }
 
-        var ids = products.stream().map(Product::getId).toList();
-        log.trace("Requesting inventory records service for product ids: {}", ids);
-        var inventories = inventoryClient.getByProductIds(ids);
+    @Override
+    @Transactional(readOnly = true)
+    public List<ProducerDTO> getAllProducersOfProductsByCategoryById(Integer categoryId) {
+        return productRepo.findAllProducersOfProductsByCategoryId(categoryId).stream()
+                .map(p -> producerMapper.toDTO(p, uploadService.getUrl(p.getLogo())))
+                .toList();
+    }
 
-        return products
-                .map(p -> {
-                    for (var i : inventories) {
-                        if (i.productId().equals(p.getId())) {
-                            return mapper.toSimpleDetailedDTO(p, i, uploadService.getUrl(p.getImage()));
-                        }
-                    }
-                    return mapper.toSimpleDetailedDTO(p, uploadService.getUrl(p.getImage()));
-                });
+    @Override
+    @Transactional(readOnly = true)
+    public Page<SimpleDetailedProductDTO> getAllDetailedByProducerId(Integer producerId, Pageable pageable) {
+        var page = productRepo.findAllByProducerId(producerId, pageable);
+        var content = fetchDetails(page.getContent());
+        return new PageImpl<>(content, pageable, content.size());
     }
 
     @Override
@@ -146,9 +159,11 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public ProductDTO create(ProductDTO dto) {
         var product = mapper.toEntity(dto);
+        product.getPackages().forEach(p -> p.setOldPrice(p.getPrice()));
         fetchRelations(product, dto);
 
         log.info("Saving product to db: {}", product);
@@ -158,6 +173,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public String saveImageById(Integer id, MultipartFile image) {
         var product = productRepo.findById(id)
@@ -237,15 +253,15 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public ProductDTO fullUpdateById(Integer id, ProductDTO dto) {
         var product = productRepo.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format(
-                        "Product with id %d not found", id))
-                );
+                .orElseThrow(() -> new ResourceNotFoundException("Product with id %d not found".formatted(id)));
 
         log.trace("Removing property groups for product with id: {}", id);
         productRepo.deleteAllPropertyGroupsById(id);
+//        product.getPackages().forEach(p -> p.setOldPrice(p.getPrice()));
         mapper.fullUpdate(dto, product);
         fetchRelations(product, dto);
         log.info("Updating product in db: {}", product);
@@ -255,6 +271,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public ProductDTO partialUpdateById(Integer id, ProductDTO dto) {
         var product = productRepo.findById(id)
@@ -276,6 +293,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public void deactivateById(Integer id) {
         log.info("Deactivating product with id: {}", id);
@@ -283,6 +301,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public void activateByIds(Collection<Integer> ids) {
         log.info("Activating products with ids: {}", ids);
@@ -290,6 +309,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public void removeImageById(Integer id) {
         var product = productRepo.findById(id)

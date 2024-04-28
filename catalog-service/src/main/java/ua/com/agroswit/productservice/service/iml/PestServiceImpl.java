@@ -2,6 +2,7 @@ package ua.com.agroswit.productservice.service.iml;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ua.com.agroswit.productservice.dto.mapper.PestMapper;
@@ -29,6 +30,7 @@ public class PestServiceImpl implements PestService {
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public PestDTO create(PestDTO dto) {
         if (pestRepo.existsByName(dto.name())) {
@@ -43,6 +45,7 @@ public class PestServiceImpl implements PestService {
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public void deleteById(Integer id) {
         log.info("Deleting pest with id from db: {}", id);

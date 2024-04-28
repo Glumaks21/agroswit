@@ -8,6 +8,6 @@ import java.util.Optional;
 
 @Repository
 public interface ProducerRepository extends JpaRepository<Producer, Integer> {
-    Optional<Producer> findByName(String name);
+    Optional<Producer> findByNameIgnoreCase(String name);
     Boolean existsByName(String name);
 }

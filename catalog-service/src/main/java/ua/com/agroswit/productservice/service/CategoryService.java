@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 import ua.com.agroswit.productservice.dto.CategoryDTO;
+import ua.com.agroswit.productservice.dto.ProducerDTO;
 import ua.com.agroswit.productservice.dto.response.SimplifiedCategoryDTO;
 import ua.com.agroswit.productservice.dto.response.SimpleDetailedProductDTO;
 
@@ -14,6 +15,7 @@ public interface CategoryService {
     List<SimplifiedCategoryDTO> getAllLowLevel();
     CategoryDTO getById(Integer id);
     CategoryDTO getByName(String name);
+    List<ProducerDTO> getAllProducersById(Integer id);
     Page<SimpleDetailedProductDTO> getAllProductsById(Integer id, Pageable pageable);
     CategoryDTO create(CategoryDTO dto);
     String saveLogo(Integer categoryId, MultipartFile logo);

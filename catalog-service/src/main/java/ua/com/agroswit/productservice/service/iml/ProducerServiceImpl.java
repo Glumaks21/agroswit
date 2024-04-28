@@ -2,15 +2,20 @@ package ua.com.agroswit.productservice.service.iml;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ua.com.agroswit.productservice.dto.mapper.ProducerMapper;
 import ua.com.agroswit.productservice.dto.ProducerDTO;
+import ua.com.agroswit.productservice.dto.response.SimpleDetailedProductDTO;
 import ua.com.agroswit.productservice.exceptions.ResourceInConflictStateException;
 import ua.com.agroswit.productservice.exceptions.ResourceNotFoundException;
 import ua.com.agroswit.productservice.repository.ProducerRepository;
 import ua.com.agroswit.productservice.service.ProducerService;
+import ua.com.agroswit.productservice.service.ProductService;
 
 import java.util.List;
 
@@ -20,9 +25,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ProducerServiceImpl implements ProducerService {
 
+    private final MinioUploadService uploadService;
+    private final ProductService productService;
     private final ProducerRepository producerRepo;
     private final ProducerMapper mapper;
-    private final MinioUploadService uploadService;
 
 
     @Override
@@ -38,28 +44,32 @@ public class ProducerServiceImpl implements ProducerService {
     public ProducerDTO getById(Integer id) {
         return producerRepo.findById(id)
                 .map(p -> mapper.toDTO(p, uploadService.getUrl(p.getLogo())))
-                .orElseThrow(() -> new ResourceNotFoundException(String.format(
-                        "Producer with id %d not found", id))
-                );
+                .orElseThrow(() -> new ResourceNotFoundException("Producer with id %d not found".formatted(id)));
     }
 
     @Override
     @Transactional(readOnly = true)
     public ProducerDTO getByName(String name) {
-        return producerRepo.findByName(name)
+        return producerRepo.findByNameIgnoreCase(name)
                 .map(p -> mapper.toDTO(p, uploadService.getUrl(p.getLogo())))
-                .orElseThrow(() -> new ResourceNotFoundException(String.format(
-                        "Producer with name %s not found", name))
-                );
+                .orElseThrow(() -> new ResourceNotFoundException("Producer with name %s not found".formatted(name)));
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public Page<SimpleDetailedProductDTO> getAllByProductsById(Integer id, Pageable pageable) {
+        if (!producerRepo.existsById(id)) {
+            throw new ResourceNotFoundException("Producer with id %d not found".formatted(id));
+        }
+        return productService.getAllDetailedByProducerId(id, pageable);
+    }
+
+    @Override
+    @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public ProducerDTO create(ProducerDTO dto) {
         if (producerRepo.existsByName(dto.name())) {
-            throw new ResourceInConflictStateException(String.format(
-                    "Producer with name %s already exists", dto.name())
-            );
+            throw new ResourceInConflictStateException("Producer with name %s already exists".formatted(dto.name()));
         }
 
         var producer = mapper.toEntity(dto);
@@ -70,12 +80,11 @@ public class ProducerServiceImpl implements ProducerService {
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public String saveLogoById(Integer producerId, MultipartFile logo) {
         var producer = producerRepo.findById(producerId)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format(
-                        "Producer with id %d not found", producerId))
-                );
+                .orElseThrow(() -> new ResourceNotFoundException("Producer with id %d not found".formatted(producerId)));
 
         log.trace("Saving producer logo to storage: {}", logo.getOriginalFilename());
         var logoName = uploadService.uploadImage(logo);
@@ -92,18 +101,16 @@ public class ProducerServiceImpl implements ProducerService {
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public ProducerDTO update(Integer id, ProducerDTO dto) {
         var producer = producerRepo.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format(
-                        "Producer with id %d not found", id))
-                );
+                .orElseThrow(() -> new ResourceNotFoundException("Producer with id %d not found".formatted(id)));
 
         if (producer.getName() != null && !producer.getName().equals(dto.name())
                 && producerRepo.existsByName(dto.name())) {
-            throw new ResourceInConflictStateException(String.format(
-                    "Producer with name %s already exists", dto.name())
-            );
+            throw new ResourceInConflictStateException(
+                    "Producer with name %s already exists".formatted(dto.name()));
         }
 
         mapper.update(dto, producer);
@@ -114,6 +121,7 @@ public class ProducerServiceImpl implements ProducerService {
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public void deleteById(Integer id) {
         producerRepo.findById(id)
@@ -129,12 +137,11 @@ public class ProducerServiceImpl implements ProducerService {
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public void removeLogoById(Integer id) {
         var producer = producerRepo.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format(
-                        "Producer with id %d not found", id))
-                );
+                .orElseThrow(() -> new ResourceNotFoundException("Producer with id %d not found".formatted(id)));
 
         if (producer.getLogo() != null) {
             log.trace("Deleting producer logo from storage: {}", producer.getLogo());
