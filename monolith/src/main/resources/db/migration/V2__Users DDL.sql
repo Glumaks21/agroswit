@@ -11,7 +11,7 @@ create table users
 create table user_info
 (
     user_id    integer     not null unique,
-    name       varchar(30) not null,
+    companyName       varchar(30) not null,
     surname    varchar(30) not null,
     patronymic varchar(30) not null,
     primary key (user_id),
@@ -45,7 +45,7 @@ create table person_info
 create table company_info
 (
     customer_id        integer      not null unique,
-    name               varchar(100) not null unique,
+    companyName               varchar(100) not null unique,
     egrpou             integer      not null unique,
     incorporation_date date         not null,
     primary key (customer_id),

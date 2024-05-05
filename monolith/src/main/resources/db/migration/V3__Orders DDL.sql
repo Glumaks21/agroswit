@@ -1,13 +1,13 @@
 create table order_state
 (
-    name varchar(30) not null,
-    primary key (name)
+    companyName varchar(30) not null,
+    primary key (companyName)
 );
 
 create table orders
 (
     id          integer     not null auto_increment,
-    state       varchar(30) not null references order_state (name),
+    state       varchar(30) not null references order_state (companyName),
     created_at  datetime(6),
     customer_id integer     not null,
     primary key (id),
@@ -32,7 +32,7 @@ create table order_items
 create table order_history
 (
     order_id    integer     not null,
-    state       varchar(30) not null references order_state (name),
+    state       varchar(30) not null references order_state (companyName),
     modified_at timestamp,
     user_id     integer     not null,
     primary key (order_id),

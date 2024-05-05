@@ -16,12 +16,14 @@
 
     <modules>
         <module>api-gateway</module>
-        <module>discovery-server</module>
-        <module>catalog-service</module>
-        <module>inventory-service</module>
-        <module>order-service</module>
-        <module>config-server</module>
-        <module>auth-service</module>
+        <module>discovery</module>
+        <module>catalog</module>
+        <module>inventory</module>
+        <module>order</module>
+        <module>config</module>
+        <module>auth</module>
+        <module>notification</module>
+        <module>user-details</module>
     </modules>
 
     <properties>
